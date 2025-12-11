@@ -51,6 +51,26 @@ namespace GraphSimulator.Execution.Model
         /// Whether this operation should be executed
         /// </summary>
         public bool Enabled { get; set; } = true;
+
+        /// <summary>
+        /// Path to graph file for graph-type operations
+        /// </summary>
+        public string? GraphFilePath { get; set; }
+
+        /// <summary>
+        /// Number of times to repeat this operation
+        /// </summary>
+        public int Frequency { get; set; } = 1;
+
+        /// <summary>
+        /// ID of the next node to execute
+        /// </summary>
+        public string? NextNodeId { get; set; }
+
+        /// <summary>
+        /// ID of the previous node that should execute before this one
+        /// </summary>
+        public string? PreviousNodeId { get; set; }
     }
 
     /// <summary>

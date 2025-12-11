@@ -297,10 +297,34 @@
                                             <TextBox Text="{Binding SelectedNodeEdit.Priority, UpdateSourceTrigger=PropertyChanged}" Padding="6"/>
                                             <TextBlock Text="(Lower value = higher priority)" FontSize="10" Foreground="Gray" Margin="0,2,0,0"/>
 
+                                            <Label Content="Frequency:" Margin="0,8,0,2"/>
+                                            <TextBox Text="{Binding SelectedNodeEdit.Frequency, UpdateSourceTrigger=PropertyChanged}" Padding="6"/>
+                                            <TextBlock Text="(Number of times to repeat this operation)" FontSize="10" Foreground="Gray" Margin="0,2,0,0"/>
+
                                             <Label Content="Description:" Margin="0,8,0,2"/>
                                             <TextBox Text="{Binding SelectedNodeEdit.Description, UpdateSourceTrigger=PropertyChanged}" Padding="6"/>
 
                                             <CheckBox Content="Enabled" IsChecked="{Binding SelectedNodeEdit.Enabled}" Margin="0,8,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Execution Flow -->
+                                    <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,12,0,0" Background="#F9F9F9">
+                                        <StackPanel>
+                                            <TextBlock Text="Execution Flow (Optional)" FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                                            <TextBlock Text="Define explicit execution order by setting next/previous node IDs" 
+                                                       FontSize="10" 
+                                                       Foreground="Gray" 
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,0,0,8"/>
+                                            
+                                            <Label Content="Next Node ID:" Margin="0,4,0,2"/>
+                                            <TextBox Text="{Binding SelectedNodeEdit.NextNodeId, UpdateSourceTrigger=PropertyChanged}" Padding="6"/>
+                                            <TextBlock Text="(Node to execute after this one)" FontSize="10" Foreground="Gray" Margin="0,2,0,0"/>
+
+                                            <Label Content="Previous Node ID:" Margin="0,8,0,2"/>
+                                            <TextBox Text="{Binding SelectedNodeEdit.PreviousNodeId, UpdateSourceTrigger=PropertyChanged}" Padding="6"/>
+                                            <TextBlock Text="(Node that should execute before this one)" FontSize="10" Foreground="Gray" Margin="0,2,0,0"/>
                                         </StackPanel>
                                     </Border>
 

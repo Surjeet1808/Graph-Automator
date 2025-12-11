@@ -82,6 +82,15 @@ namespace GraphSimulator.ViewModels
         private string graphFilePath = "";
         public string GraphFilePath { get => graphFilePath; set { SetProperty(ref graphFilePath, value); UpdateJsonData(); } }
 
+        private int frequency = 1;
+        public int Frequency { get => frequency; set { SetProperty(ref frequency, value < 1 ? 1 : value); UpdateJsonData(); } }
+
+        private string nextNodeId = "";
+        public string NextNodeId { get => nextNodeId; set { SetProperty(ref nextNodeId, value); UpdateJsonData(); } }
+
+        private string previousNodeId = "";
+        public string PreviousNodeId { get => previousNodeId; set { SetProperty(ref previousNodeId, value); UpdateJsonData(); } }
+
         private bool isUpdatingFromJson = false;
 
         private void UpdateJsonDataForType()
@@ -155,6 +164,9 @@ namespace GraphSimulator.ViewModels
                     Priority = priority,
                     DelayBefore = delayBefore,
                     DelayAfter = delayAfter,
+                    Frequency = frequency,
+                    NextNodeId = string.IsNullOrEmpty(nextNodeId) ? null : nextNodeId,
+                    PreviousNodeId = string.IsNullOrEmpty(previousNodeId) ? null : previousNodeId,
                     Description = string.IsNullOrEmpty(description) ? null : description,
                     Enabled = enabled
                 };
@@ -285,6 +297,22 @@ namespace GraphSimulator.ViewModels
                     delayAfter = delayAfterElement.GetInt32();
                 }
 
+                if (root.TryGetProperty("Frequency", out var frequencyElement))
+                {
+                    frequency = frequencyElement.GetInt32();
+                    if (frequency < 1) frequency = 1;
+                }
+
+                if (root.TryGetProperty("NextNodeId", out var nextNodeIdElement))
+                {
+                    nextNodeId = nextNodeIdElement.GetString() ?? "";
+                }
+
+                if (root.TryGetProperty("PreviousNodeId", out var previousNodeIdElement))
+                {
+                    previousNodeId = previousNodeIdElement.GetString() ?? "";
+                }
+
                 if (root.TryGetProperty("Description", out var descriptionElement))
                 {
                     description = descriptionElement.GetString() ?? "";
@@ -305,6 +333,9 @@ namespace GraphSimulator.ViewModels
                 OnPropertyChanged(nameof(GraphFilePath));
                 OnPropertyChanged(nameof(DelayBefore));
                 OnPropertyChanged(nameof(DelayAfter));
+                OnPropertyChanged(nameof(Frequency));
+                OnPropertyChanged(nameof(NextNodeId));
+                OnPropertyChanged(nameof(PreviousNodeId));
                 OnPropertyChanged(nameof(Priority));
                 OnPropertyChanged(nameof(Enabled));
                 OnPropertyChanged(nameof(Description));

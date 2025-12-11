@@ -21,6 +21,11 @@ namespace GraphSimulator.ViewModels
         private string? _currentFilePath;
         private Node? _clipboardNode = null;
 
+        /// <summary>
+        /// Gets the current file path being edited
+        /// </summary>
+        public string? CurrentFilePath => _currentFilePath;
+
         [ObservableProperty]
         private Graph currentGraph;
 
@@ -385,6 +390,40 @@ namespace GraphSimulator.ViewModels
             if (sourceNode == null)
             {
                 StatusMessage = "Source node no longer exists";
+                CancelLinkCreation();
+                return;
+            }
+
+            // Check if source node already has an outgoing link (exit)
+            var sourceOutgoingLinks = CurrentGraph.Links.Where(l => l.SourceNodeId == LinkSourceNodeId.Value).ToList();
+            if (sourceOutgoingLinks.Count >= 1)
+            {
+                StatusMessage = "Source node already has an exit link. Each node can have only one exit.";
+                System.Windows.MessageBox.Show(
+                    "Each node can have only one exit link.\n\n" +
+                    $"'{sourceNode.Name}' already has an outgoing connection.\n" +
+                    "Remove the existing link first if you want to create a new one.",
+                    "Link Limit Reached",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning
+                );
+                CancelLinkCreation();
+                return;
+            }
+
+            // Check if target node already has an incoming link (entry)
+            var targetIncomingLinks = CurrentGraph.Links.Where(l => l.TargetNodeId == targetNode.Id).ToList();
+            if (targetIncomingLinks.Count >= 1)
+            {
+                StatusMessage = "Target node already has an entry link. Each node can have only one entry.";
+                System.Windows.MessageBox.Show(
+                    "Each node can have only one entry link.\n\n" +
+                    $"'{targetNode.Name}' already has an incoming connection.\n" +
+                    "Remove the existing link first if you want to create a new one.",
+                    "Link Limit Reached",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning
+                );
                 CancelLinkCreation();
                 return;
             }
