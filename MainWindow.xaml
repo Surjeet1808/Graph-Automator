@@ -185,12 +185,9 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="40"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBox Text="{Binding SelectedNodeEdit.Color}" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="8"/>
+                                        <TextBox Text="{Binding SelectedNodeEdit.Color}" IsEnabled="False" Padding="8" Background="#F5F5F5"/>
                                         <Rectangle Grid.Column="1" Margin="8" Fill="{Binding SelectedNodeEdit.Color}"/>
                                     </Grid>
-
-                                    <!-- Floating color palette: open via button -->
-                                    <Button x:Name="ColorButton" Content="Choose Color" Click="ColorButton_Click" Margin="0,8,0,0" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="8" />
 
                                     <!-- Dynamic Operation-Specific Fields -->
                                     <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,16,0,0" Background="#F9F9F9">

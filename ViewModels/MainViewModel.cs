@@ -161,6 +161,7 @@ namespace GraphSimulator.ViewModels
             nodeType ??= "mouse_left_click";
             var node = new Node 
             { 
+                Name = FormatOperationTypeName(nodeType),
                 Type = nodeType,
                 Color = Graph.GetColorForNodeType(nodeType),
                 JsonData = GetDefaultJsonForType(nodeType)
@@ -182,6 +183,7 @@ namespace GraphSimulator.ViewModels
             var nodeType = "mouse_left_click";
             var node = new Node
             {
+                Name = FormatOperationTypeName(nodeType),
                 Type = nodeType,
                 Color = Graph.GetColorForNodeType(nodeType),
                 JsonData = GetDefaultJsonForType(nodeType)
@@ -251,6 +253,22 @@ namespace GraphSimulator.ViewModels
                 "type_text" => new[] { "Hello World" },
                 _ => Array.Empty<string>()
             };
+        }
+
+        /// <summary>
+        /// Formats operation type name by replacing underscores with spaces and capitalizing
+        /// </summary>
+        private string FormatOperationTypeName(string type)
+        {
+            if (string.IsNullOrEmpty(type))
+                return "New Node";
+            
+            // Replace underscores with spaces and capitalize each word
+            var words = type.Split('_');
+            var formattedWords = words.Select(w => 
+                string.IsNullOrEmpty(w) ? "" : char.ToUpper(w[0]) + w.Substring(1).ToLower()
+            );
+            return string.Join(" ", formattedWords);
         }
 
         /// <summary>
@@ -603,7 +621,19 @@ namespace GraphSimulator.ViewModels
                 {
                     StatusMessage = "Loading graph...";
                     var graph = await _fileService.LoadGraphAsync(dialog.FileName);
-                    CurrentGraph = graph ?? new Graph();
+                    if (graph != null)
+                    {
+                        // Reinitialize ports for all nodes after deserialization
+                        foreach (var node in graph.Nodes)
+                        {
+                            ReinitializeNodePorts(node);
+                        }
+                        CurrentGraph = graph;
+                    }
+                    else
+                    {
+                        CurrentGraph = new Graph();
+                    }
                     _currentFilePath = dialog.FileName;
                     _fileService.SaveRecentFile(dialog.FileName);
                     LoadRecentFiles();
@@ -615,6 +645,20 @@ namespace GraphSimulator.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"Error loading graph: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Reinitializes ports for a node (needed after deserialization)
+        /// </summary>
+        private void ReinitializeNodePorts(Node node)
+        {
+            if (node.Ports.Count == 0)
+            {
+                node.Ports.Add(new Port { NodeId = node.Id, Position = PortPosition.Top });
+                node.Ports.Add(new Port { NodeId = node.Id, Position = PortPosition.Right });
+                node.Ports.Add(new Port { NodeId = node.Id, Position = PortPosition.Bottom });
+                node.Ports.Add(new Port { NodeId = node.Id, Position = PortPosition.Left });
             }
         }
 

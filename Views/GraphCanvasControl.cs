@@ -208,6 +208,13 @@ namespace GraphSimulator.Views
                 Tag = node.Id,
                 Cursor = Cursors.Hand
             };
+            
+            // Add tooltip to show operation type
+            var tooltip = new ToolTip
+            {
+                Content = $"Type: {node.Type}\nName: {displayName}"
+            };
+            grid.ToolTip = tooltip;
 
             try
             {
