@@ -610,7 +610,7 @@ namespace GraphSimulator
         }
 
         /// <summary>
-        /// Parses graph nodes to extract operation definitions following link flow from start nodes
+        /// Parses graph nodes to extract operation definitions following link flow from start node
         /// </summary>
         private List<OperationModel> ParseGraphOperations()
         {
@@ -619,85 +619,78 @@ namespace GraphSimulator
             if (_viewModel?.CurrentGraph?.Nodes == null)
                 return operations;
 
-            // Find all start nodes
-            var startNodes = _viewModel.CurrentGraph.Nodes.Where(n => n.Type?.ToLower() == "start").ToList();
+            // Find the start node
+            var startNode = _viewModel.CurrentGraph.Nodes.FirstOrDefault(n => n.Type?.ToLower() == "start");
             
-            if (startNodes.Count == 0)
+            if (startNode == null)
             {
                 throw new InvalidOperationException(
                     "⚠️ NO START NODE FOUND\n\n" +
-                    "The graph must contain at least one 'start' node.\n\n" +
+                    "The graph must contain exactly one 'start' node.\n\n" +
                     "Please add a start node to define where execution should begin.");
             }
 
-            // Process each start node's chain
-            var globalVisitedNodes = new HashSet<Guid>();
+            // Traverse from start node following outgoing links
+            var visitedNodes = new HashSet<Guid>();
+            var currentNode = startNode;
             int priority = 1;
 
-            foreach (var startNode in startNodes)
+            while (currentNode != null)
             {
-                // Traverse from this start node following outgoing links
-                var visitedNodes = new HashSet<Guid>();
-                var currentNode = startNode;
-
-                while (currentNode != null)
+                // Check for cycles
+                if (visitedNodes.Contains(currentNode.Id))
                 {
-                    // Check for cycles within this chain
-                    if (visitedNodes.Contains(currentNode.Id))
-                    {
-                        throw new InvalidOperationException(
-                            $"⚠️ CIRCULAR EXECUTION PATH DETECTED\n\n" +
-                            $"Node '{currentNode.Name}' has already been visited in this execution chain.\n\n" +
-                            "The graph contains a loop. Please remove circular links.");
-                    }
+                    throw new InvalidOperationException(
+                        $"⚠️ CIRCULAR EXECUTION PATH DETECTED\n\n" +
+                        $"Node '{currentNode.Name}' has already been visited.\n\n" +
+                        "The graph contains a loop. Please remove circular links.");
+                }
 
-                    visitedNodes.Add(currentNode.Id);
-                    globalVisitedNodes.Add(currentNode.Id);
+                visitedNodes.Add(currentNode.Id);
 
-                    // Skip start node itself - it's just a marker
-                    if (currentNode.Type?.ToLower() != "start")
+                // Skip start node itself - it's just a marker
+                if (currentNode.Type?.ToLower() != "start")
+                {
+                    try
                     {
-                        try
+                        // Parse JSON data from node
+                        if (!string.IsNullOrWhiteSpace(currentNode.JsonData))
                         {
-                            // Parse JSON data from node
-                            if (!string.IsNullOrWhiteSpace(currentNode.JsonData))
-                            {
-                                var operation = System.Text.Json.JsonSerializer.Deserialize<OperationModel>(
-                                    currentNode.JsonData,
-                                    new System.Text.Json.JsonSerializerOptions 
-                                    { 
-                                        PropertyNameCaseInsensitive = true 
-                                    }
-                                );
-
-                                if (operation != null && !string.IsNullOrEmpty(operation.Type))
-                                {
-                                    // Set priority based on traversal order
-                                    operation.Priority = priority++;
-                                    operations.Add(operation);
+                            var operation = System.Text.Json.JsonSerializer.Deserialize<OperationModel>(
+                                currentNode.JsonData,
+                                new System.Text.Json.JsonSerializerOptions 
+                                { 
+                                    PropertyNameCaseInsensitive = true 
                                 }
+                            );
+
+                            if (operation != null && !string.IsNullOrEmpty(operation.Type))
+                            {
+                                // Set priority based on traversal order
+                                operation.Priority = priority++;
+                                operations.Add(operation);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            throw new InvalidOperationException(
-                                $"❌ Failed to parse node '{currentNode.Name}'\n\n" +
-                                $"Error: {ex.Message}");
-                        }
                     }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException(
+                            $"❌ Failed to parse node '{currentNode.Name}'\n\n" +
+                            $"Error: {ex.Message}");
+                    }
+                }
 
-                    // Find the next node by following outgoing link
-                    var outgoingLink = _viewModel.CurrentGraph.Links.FirstOrDefault(l => l.SourceNodeId == currentNode.Id);
-                    
-                    if (outgoingLink != null)
-                    {
-                        currentNode = _viewModel.CurrentGraph.Nodes.FirstOrDefault(n => n.Id == outgoingLink.TargetNodeId);
-                    }
-                    else
-                    {
-                        // No outgoing link - end of chain
-                        break;
-                    }
+                // Find the next node by following outgoing link
+                var outgoingLink = _viewModel.CurrentGraph.Links.FirstOrDefault(l => l.SourceNodeId == currentNode.Id);
+                
+                if (outgoingLink != null)
+                {
+                    currentNode = _viewModel.CurrentGraph.Nodes.FirstOrDefault(n => n.Id == outgoingLink.TargetNodeId);
+                }
+                else
+                {
+                    // No outgoing link - end of chain
+                    break;
                 }
             }
 

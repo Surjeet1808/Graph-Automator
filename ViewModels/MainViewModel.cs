@@ -165,6 +165,26 @@ namespace GraphSimulator.ViewModels
         {
             nodeType ??= "mouse_left_click";
             
+            // Check if trying to add a start node when one already exists
+            if (nodeType.ToLower() == "start")
+            {
+                var existingStartNode = CurrentGraph.Nodes.FirstOrDefault(n => n.Type?.ToLower() == "start");
+                if (existingStartNode != null)
+                {
+                    StatusMessage = "Cannot add start node: A start node already exists";
+                    System.Windows.MessageBox.Show(
+                        "❌ Cannot Add Start Node\n\n" +
+                        "A graph can have only ONE start node.\n\n" +
+                        $"Existing start node: '{existingStartNode.Name}'\n\n" +
+                        "Please remove the existing start node first if you want to add a new one.",
+                        "Start Node Limit",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning
+                    );
+                    return;
+                }
+            }
+            
             var node = new Node 
             { 
                 Name = FormatOperationTypeName(nodeType),
