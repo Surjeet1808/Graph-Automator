@@ -550,11 +550,61 @@ namespace GraphSimulator
             catch (Exception ex)
             {
                 _viewModel!.StatusMessage = $"Execution failed: {ex.Message}";
+                
+                // Determine failure type and show appropriate message
+                string failureType = "Unknown Error";
+                string failureDetails = ex.Message;
+                MessageBoxImage icon = MessageBoxImage.Error;
+
+                if (ex is System.IO.FileNotFoundException)
+                {
+                    failureType = "File Not Found";
+                    icon = MessageBoxImage.Warning;
+                }
+                else if (ex.Message.Contains("CIRCULAR DEPENDENCY"))
+                {
+                    failureType = "Circular Dependency Detected";
+                    icon = MessageBoxImage.Warning;
+                }
+                else if (ex.Message.Contains("GraphFilePath is required"))
+                {
+                    failureType = "Missing Graph File Path";
+                    icon = MessageBoxImage.Warning;
+                }
+                else if (ex.Message.Contains("Failed to load graph"))
+                {
+                    failureType = "Graph Loading Failed";
+                    icon = MessageBoxImage.Error;
+                }
+                else if (ex.Message.Contains("Invalid JSON data"))
+                {
+                    failureType = "Invalid Node Data";
+                    icon = MessageBoxImage.Error;
+                }
+                else if (ex.Message.Contains("No valid operations"))
+                {
+                    failureType = "Empty or Invalid Graph";
+                    icon = MessageBoxImage.Warning;
+                }
+                else if (ex is InvalidOperationException)
+                {
+                    failureType = "Operation Failed";
+                    icon = MessageBoxImage.Error;
+                }
+                else if (ex is ArgumentException)
+                {
+                    failureType = "Invalid Configuration";
+                    icon = MessageBoxImage.Warning;
+                }
+
                 MessageBox.Show(
-                    $"Execution failed:\n\n{ex.Message}",
-                    "Execution Error",
+                    $"❌ Execution Failed\n\n" +
+                    $"Failure Type: {failureType}\n\n" +
+                    $"Details:\n{failureDetails}\n\n" +
+                    $"Please fix the issue and try again.",
+                    $"Execution Error - {failureType}",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error
+                    icon
                 );
             }
         }
@@ -1001,7 +1051,7 @@ namespace GraphSimulator
         /// <summary>
         /// Handles Browse button click to select a graph file
         /// </summary>
-        private async void BrowseGraphFile_Click(object sender, RoutedEventArgs e)
+        private void BrowseGraphFile_Click(object sender, RoutedEventArgs e)
         {
             if (_viewModel?.SelectedNodeEdit == null)
                 return;
@@ -1016,144 +1066,15 @@ namespace GraphSimulator
 
                 if (dialog.ShowDialog() == true)
                 {
-                    // Show loading message
-                    GraphValidationMessage.Text = "⏳ Validating graph file...";
-                    GraphValidationMessage.Foreground = new SolidColorBrush(Colors.Orange);
-                    
-                    // Check for circular dependency first
-                    string selectedAbsolutePath = System.IO.Path.GetFullPath(dialog.FileName);
-                    string currentGraphPath = string.IsNullOrEmpty(_viewModel.CurrentFilePath) ? "" : System.IO.Path.GetFullPath(_viewModel.CurrentFilePath);
-                    
-                    if (!string.IsNullOrEmpty(currentGraphPath) && 
-                        selectedAbsolutePath.Equals(currentGraphPath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        GraphValidationMessage.Text = "⚠️ Cannot select current graph (circular dependency)";
-                        GraphValidationMessage.Foreground = new SolidColorBrush(Colors.Red);
-                        MessageBox.Show(
-                            "⚠️ CIRCULAR DEPENDENCY WARNING!\n\n" +
-                            "You cannot select the current graph file as a nested graph operation.\n\n" +
-                            "This would create a direct circular reference:\n" +
-                            $"  {System.IO.Path.GetFileName(currentGraphPath)} → {System.IO.Path.GetFileName(selectedAbsolutePath)} (same file!)\n\n" +
-                            "Please select a different graph file.",
-                            "Circular Dependency Detected",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning
-                        );
-                        return;
-                    }
-                    
-                    // Validate the selected graph file asynchronously
-                    var (isValid, warningMessage) = await ValidateGraphFileAsync(dialog.FileName, currentGraphPath);
-                    
-                    if (isValid)
-                    {
-                        _viewModel.SelectedNodeEdit.GraphFilePath = dialog.FileName;
-                        if (!string.IsNullOrEmpty(warningMessage))
-                        {
-                            GraphValidationMessage.Text = $"⚠️ {warningMessage}";
-                            GraphValidationMessage.Foreground = new SolidColorBrush(Colors.Orange);
-                        }
-                        else
-                        {
-                            GraphValidationMessage.Text = "✓ Valid graph file selected";
-                            GraphValidationMessage.Foreground = new SolidColorBrush(Colors.Green);
-                        }
-                    }
-                    else
-                    {
-                        GraphValidationMessage.Text = "✗ Invalid or unexecutable graph file";
-                        GraphValidationMessage.Foreground = new SolidColorBrush(Colors.Red);
-                        _viewModel.SelectedNodeEdit.GraphFilePath = "";
-                    }
+                    // Store the path immediately without validation
+                    _viewModel.SelectedNodeEdit.GraphFilePath = dialog.FileName;
+                    GraphValidationMessage.Text = $"📄 Selected: {System.IO.Path.GetFileName(dialog.FileName)}";
+                    GraphValidationMessage.Foreground = new SolidColorBrush(Colors.Blue);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error selecting graph file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        /// <summary>
-        /// Validates if a graph file is valid and executable asynchronously
-        /// </summary>
-        private async System.Threading.Tasks.Task<(bool isValid, string warningMessage)> ValidateGraphFileAsync(string filePath, string currentGraphPath = "")
-        {
-            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
-                return (false, "");
-
-            try
-            {
-                // Try to load and parse the graph asynchronously
-                var fileService = new GraphSimulator.Services.FileService();
-                var graph = await fileService.LoadGraphAsync(filePath);
-
-                if (graph == null || graph.Nodes.Count == 0)
-                    return (false, "");
-
-                // Check if graph has at least one valid operation node
-                bool hasValidOperations = false;
-                bool hasNestedGraphs = false;
-                
-                foreach (var node in graph.Nodes)
-                {
-                    if (!string.IsNullOrEmpty(node.Type) && 
-                        Graph.DefaultNodeTypes.Contains(node.Type.ToLower()))
-                    {
-                        if (node.Type.ToLower() == "graph")
-                        {
-                            hasNestedGraphs = true;
-                            
-                            // Check if any nested graph references back to current graph
-                            if (!string.IsNullOrEmpty(currentGraphPath))
-                            {
-                                try
-                                {
-                                    var nodeData = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, System.Text.Json.JsonElement>>(
-                                        node.JsonData,
-                                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                                    );
-                                    
-                                    if (nodeData != null && nodeData.TryGetValue("GraphFilePath", out var pathElement))
-                                    {
-                                        string nestedPath = pathElement.GetString();
-                                        if (!string.IsNullOrEmpty(nestedPath) && System.IO.File.Exists(nestedPath))
-                                        {
-                                            string nestedAbsolutePath = System.IO.Path.GetFullPath(nestedPath);
-                                            if (nestedAbsolutePath.Equals(currentGraphPath, StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                return (false, "Contains circular reference to current graph");
-                                            }
-                                        }
-                                    }
-                                }
-                                catch
-                                {
-                                    // Ignore JSON parsing errors during validation
-                                }
-                            }
-                        }
-                        else
-                        {
-                            hasValidOperations = true;
-                        }
-                    }
-                }
-
-                if (!hasValidOperations && !hasNestedGraphs)
-                    return (false, "");
-
-                // Return warning if graph only contains nested graphs
-                string warning = "";
-                if (hasNestedGraphs && !hasValidOperations)
-                {
-                    warning = "Graph only contains nested graph operations";
-                }
-
-                return (true, warning);
-            }
-            catch
-            {
-                return (false, "");
             }
         }
 
