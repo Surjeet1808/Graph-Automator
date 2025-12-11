@@ -174,8 +174,7 @@
                             
                             <!-- Action Buttons on Left -->
                             <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Button Content="Save" Command="{Binding SaveNodePropertiesCommand}" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="6,4" Margin="0,0,4,0" Background="#4CAF50" Foreground="White" ToolTip="Save Node Properties"/>
-                                <Button Content="Delete" Command="{Binding DeleteNodeCommand}" IsEnabled="{Binding SelectedNode, Converter={StaticResource IsNotNullConverter}}" Padding="6,4" Margin="0,0,4,0" Background="#F44336" Foreground="White" ToolTip="Delete Selected Node/Link"/>
+                                <Button Content="Save" Command="{Binding SaveNodePropertiesCommand}" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="6,4" Margin="0,0,4,0" ToolTip="Save Node Properties"/>
                                 <Button Content="Cancel" Click="NodeProperties_Cancel_Click" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="6,4" ToolTip="Cancel Changes"/>
                             </StackPanel>
                             
