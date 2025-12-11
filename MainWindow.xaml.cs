@@ -637,6 +637,15 @@ namespace GraphSimulator
 
             while (currentNode != null)
             {
+                // Check for cycles
+                if (visitedNodes.Contains(currentNode.Id))
+                {
+                    throw new InvalidOperationException(
+                        $"⚠️ CIRCULAR EXECUTION PATH DETECTED\n\n" +
+                        $"Node '{currentNode.Name}' has already been visited.\n\n" +
+                        "The graph contains a loop. Please remove circular links.");
+                }
+
                 visitedNodes.Add(currentNode.Id);
 
                 // Skip start node itself - it's just a marker
