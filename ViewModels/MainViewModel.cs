@@ -79,6 +79,30 @@ namespace GraphSimulator.ViewModels
 
         public ObservableCollection<string> NodeTypes { get; }
         public ObservableCollection<string> RecentFiles { get; }
+        
+        /// <summary>
+        /// Gets available node types, excluding 'start' if a start node already exists
+        /// </summary>
+        public ObservableCollection<string> AvailableNodeTypes
+        {
+            get
+            {
+                var types = new ObservableCollection<string>();
+                var startNodeExists = CurrentGraph?.Nodes?.Any(n => n.Type?.ToLower() == "start") ?? false;
+                
+                foreach (var type in Graph.DefaultNodeTypes)
+                {
+                    // Exclude 'start' type if a start node already exists and we're not editing the start node
+                    if (type.ToLower() == "start" && startNodeExists && SelectedNode?.Type?.ToLower() != "start")
+                    {
+                        continue;
+                    }
+                    types.Add(type);
+                }
+                
+                return types;
+            }
+        }
 
         public MainViewModel()
         {
@@ -104,6 +128,7 @@ namespace GraphSimulator.ViewModels
             if (value == null)
             {
                 SelectedNodeEdit = null;
+                OnPropertyChanged(nameof(AvailableNodeTypes));
                 return;
             }
 
@@ -155,6 +180,7 @@ namespace GraphSimulator.ViewModels
             _currentFilePath = null;
             StatusMessage = "New graph created";
             UpdateStatistics();
+            OnPropertyChanged(nameof(AvailableNodeTypes));
         }
 
         /// <summary>
@@ -198,6 +224,7 @@ namespace GraphSimulator.ViewModels
             
             StatusMessage = $"Node '{node.Name}' added";
             UpdateStatistics();
+            OnPropertyChanged(nameof(AvailableNodeTypes));
         }
 
         /// <summary>
@@ -313,6 +340,7 @@ namespace GraphSimulator.ViewModels
             SelectedNode = null;
             StatusMessage = "Node deleted";
             UpdateStatistics();
+            OnPropertyChanged(nameof(AvailableNodeTypes));
         }
 
         /// <summary>
@@ -351,6 +379,7 @@ namespace GraphSimulator.ViewModels
 
             StatusMessage = $"Node '{SelectedNode.Name}' properties saved";
             UpdateStatistics();
+            OnPropertyChanged(nameof(AvailableNodeTypes));
                
         }
 
@@ -716,6 +745,7 @@ namespace GraphSimulator.ViewModels
                     _commandHistory.Clear();
                     StatusMessage = $"Graph loaded from {System.IO.Path.GetFileName(dialog.FileName)}";
                     UpdateStatistics();
+                    OnPropertyChanged(nameof(AvailableNodeTypes));
                 }
             }
             catch (Exception ex)

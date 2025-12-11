@@ -166,9 +166,24 @@
                 <DockPanel>
                     <!-- Toggle Button Header -->
                     <Border DockPanel.Dock="Top" Background="#F0F0F0" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1" Padding="8">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button x:Name="SidebarToggleButton" Content="−" Padding="4,0" Width="32" Height="32" Click="SidebarToggle_Click" ToolTip="Toggle sidebar"/>
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Action Buttons on Left -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Button Content="Save" Command="{Binding SaveNodePropertiesCommand}" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="6,4" Margin="0,0,4,0" Background="#4CAF50" Foreground="White" ToolTip="Save Node Properties"/>
+                                <Button Content="Delete" Command="{Binding DeleteNodeCommand}" IsEnabled="{Binding SelectedNode, Converter={StaticResource IsNotNullConverter}}" Padding="6,4" Margin="0,0,4,0" Background="#F44336" Foreground="White" ToolTip="Delete Selected Node/Link"/>
+                                <Button Content="Cancel" Click="NodeProperties_Cancel_Click" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="6,4" ToolTip="Cancel Changes"/>
+                            </StackPanel>
+                            
+                            <!-- Toggle Button on Right -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="SidebarToggleButton" Content="−" Padding="4,0" Width="32" Height="32" Click="SidebarToggle_Click" ToolTip="Toggle sidebar"/>
+                            </StackPanel>
+                        </Grid>
                     </Border>
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto" DockPanel.Dock="Bottom">
@@ -180,7 +195,7 @@
                                     <TextBox Text="{Binding SelectedNodeEdit.Name, UpdateSourceTrigger=PropertyChanged}" Padding="8" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}"/>
 
                                     <Label Content="Operation Type:" FontWeight="Bold" Margin="0,16,0,8"/>
-                                    <ComboBox ItemsSource="{Binding NodeTypes}" SelectedItem="{Binding SelectedNodeEdit.Type}" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="8"/>
+                                    <ComboBox ItemsSource="{Binding AvailableNodeTypes}" SelectedItem="{Binding SelectedNodeEdit.Type}" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="8"/>
 
                                     <Label Content="Color:" FontWeight="Bold" Margin="0,16,0,8"/>
                                     <Grid>
@@ -317,11 +332,6 @@
                                                            IsReadOnly="True"
                                                            Margin="0,0,0,8"
                                                            Background="#F5F5F5"/>
-
-                                    <UniformGrid Rows="1" Columns="2" Margin="0,8,0,0">
-                                        <Button Content="Save" Command="{Binding SaveNodePropertiesCommand}" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="8" Margin="0,0,4,0" Background="#4CAF50" Foreground="White"/>
-                                        <Button Content="Cancel" Click="NodeProperties_Cancel_Click" IsEnabled="{Binding SelectedNodeEdit, Converter={StaticResource IsNotNullConverter}}" Padding="8" />
-                                    </UniformGrid>
                                 </StackPanel>
                             </Expander>
 
