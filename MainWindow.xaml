@@ -16,6 +16,29 @@
     <Window.Resources>
         <utilities:IsNotNullConverter x:Key="IsNotNullConverter" />
         <utilities:LinkInfoConverter x:Key="LinkInfoConverter" />
+        <!-- Toolbar Tab Contents (hidden, used for switching) -->
+        <StackPanel x:Key="ControlButtonsPanel" Orientation="Horizontal" Background="#F5F5F5" Height="48" Visibility="Collapsed">
+            <Button Margin="8" Padding="8" Command="{Binding NewGraphCommand}" ToolTip="New Graph (Ctrl+N)">New</Button>
+            <Button Margin="8" Padding="8" Command="{Binding OpenGraphCommand}" ToolTip="Open Graph (Ctrl+O)">Open</Button>
+            <Button Margin="8" Padding="8" Command="{Binding SaveGraphCommand}" ToolTip="Save (Ctrl+S)">Save</Button>
+            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
+            <Button Margin="8" Padding="8" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" ToolTip="{Binding UndoDescription}">Undo</Button>
+            <Button Margin="8" Padding="8" Command="{Binding RedoCommand}" IsEnabled="{Binding CanRedo}" ToolTip="{Binding RedoDescription}">Redo</Button>
+            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
+            <Button Margin="8" Padding="8" Command="{Binding AddNodeCommand}" ToolTip="Add Node">Add Node</Button>
+            <Button Margin="8" Padding="8" Command="{Binding StartExecutionCommand}" ToolTip="Execute graph operations in sequence" Background="#4CAF50" Foreground="White" FontWeight="Bold">▶ Start Execution</Button>
+            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
+            <Label VerticalAlignment="Center" Margin="8,0">Zoom:</Label>
+            <TextBlock VerticalAlignment="Center" Text="{Binding CanvasZoom}" Margin="0,0,8,0"/>
+        </StackPanel>
+        <StackPanel x:Key="MouseScrollPanel" Orientation="Horizontal" Background="#F5F5F5" Height="48" Visibility="Collapsed">
+            <CheckBox x:Name="ShowMousePositionCheckBox" Content="Show Mouse Position" VerticalAlignment="Center" Margin="8,0" Checked="ShowMousePosition_Checked" Unchecked="ShowMousePosition_Unchecked" ToolTip="Display real-time mouse coordinates"/>
+            <TextBlock x:Name="MousePositionText" VerticalAlignment="Center" Margin="8,0" Foreground="#007ACC" FontWeight="Bold" Text="X: 0, Y: 0" Visibility="Collapsed"/>
+            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
+            <CheckBox x:Name="ScrollMeasureCheckBox" Content="Scroll Measure" VerticalAlignment="Center" Margin="8,0" Checked="ScrollMeasure_Checked" Unchecked="ScrollMeasure_Unchecked" ToolTip="Measure scroll amount for automation"/>
+            <TextBlock x:Name="ScrollMeasureText" VerticalAlignment="Center" Margin="8,0" Foreground="#FF5722" FontWeight="Bold" Text="Scroll: 0" Visibility="Collapsed"/>
+            <Button x:Name="ResetScrollButton" Content="Reset" Padding="4,2" Margin="4,0" Click="ResetScroll_Click" Visibility="Collapsed" ToolTip="Reset scroll counter"/>
+        </StackPanel>
     </Window.Resources>
     
     <DockPanel>
@@ -71,29 +94,6 @@
     <!-- Toolbar Options Row: Show content of selected tab below menu bar -->
     <ContentControl x:Name="ToolbarTabContent" DockPanel.Dock="Top" />
 
-        <!-- Toolbar Tab Contents (hidden, used for switching) -->
-        <StackPanel x:Key="ControlButtonsPanel" Orientation="Horizontal" Background="#F5F5F5" Height="48" Visibility="Collapsed">
-            <Button Margin="8" Padding="8" Command="{Binding NewGraphCommand}" ToolTip="New Graph (Ctrl+N)">New</Button>
-            <Button Margin="8" Padding="8" Command="{Binding OpenGraphCommand}" ToolTip="Open Graph (Ctrl+O)">Open</Button>
-            <Button Margin="8" Padding="8" Command="{Binding SaveGraphCommand}" ToolTip="Save (Ctrl+S)">Save</Button>
-            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
-            <Button Margin="8" Padding="8" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" ToolTip="{Binding UndoDescription}">Undo</Button>
-            <Button Margin="8" Padding="8" Command="{Binding RedoCommand}" IsEnabled="{Binding CanRedo}" ToolTip="{Binding RedoDescription}">Redo</Button>
-            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
-            <Button Margin="8" Padding="8" Command="{Binding AddNodeCommand}" ToolTip="Add Node">Add Node</Button>
-            <Button Margin="8" Padding="8" Command="{Binding StartExecutionCommand}" ToolTip="Execute graph operations in sequence" Background="#4CAF50" Foreground="White" FontWeight="Bold">▶ Start Execution</Button>
-            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
-            <Label VerticalAlignment="Center" Margin="8,0">Zoom:</Label>
-            <TextBlock VerticalAlignment="Center" Text="{Binding CanvasZoom}" Margin="0,0,8,0"/>
-        </StackPanel>
-        <StackPanel x:Key="MouseScrollPanel" Orientation="Horizontal" Background="#F5F5F5" Height="48" Visibility="Collapsed">
-            <CheckBox x:Name="ShowMousePositionCheckBox" Content="Show Mouse Position" VerticalAlignment="Center" Margin="8,0" Checked="ShowMousePosition_Checked" Unchecked="ShowMousePosition_Unchecked" ToolTip="Display real-time mouse coordinates"/>
-            <TextBlock x:Name="MousePositionText" VerticalAlignment="Center" Margin="8,0" Foreground="#007ACC" FontWeight="Bold" Text="X: 0, Y: 0" Visibility="Collapsed"/>
-            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
-            <CheckBox x:Name="ScrollMeasureCheckBox" Content="Scroll Measure" VerticalAlignment="Center" Margin="8,0" Checked="ScrollMeasure_Checked" Unchecked="ScrollMeasure_Unchecked" ToolTip="Measure scroll amount for automation"/>
-            <TextBlock x:Name="ScrollMeasureText" VerticalAlignment="Center" Margin="8,0" Foreground="#FF5722" FontWeight="Bold" Text="Scroll: 0" Visibility="Collapsed"/>
-            <Button x:Name="ResetScrollButton" Content="Reset" Padding="4,2" Margin="4,0" Click="ResetScroll_Click" Visibility="Collapsed" ToolTip="Reset scroll counter"/>
-        </StackPanel>
         <StatusBar DockPanel.Dock="Bottom" Background="#F5F5F5">
             <StatusBarItem>
                 <TextBlock Text="{Binding StatusMessage}" />
