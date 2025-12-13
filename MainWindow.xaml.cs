@@ -55,7 +55,7 @@ namespace GraphSimulator
                     if (App.AutoExecute)
                     {
                         // Auto-execute the graph
-                        _viewModel.ExecuteGraphCommand.Execute(null);
+                        _viewModel.StartExecutionCommand.Execute(null);
                     }
                 }
             };
