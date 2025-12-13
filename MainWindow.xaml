@@ -57,7 +57,8 @@
                 <MenuItem Header="Dark _Mode" IsCheckable="True" IsChecked="{Binding IsDarkMode}" Click="MenuItem_DarkMode_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
-            <MenuItem Header="_About" Click="MenuItem_About_Click"/>
+                <MenuItem Header="_About" Click="MenuItem_About_Click"/>
+            </MenuItem>
         </Menu>
         <!-- Toolbar: All controls in a single horizontal row below the menu bar -->
         <StackPanel Orientation="Horizontal" Background="#F5F5F5" Height="48" DockPanel.Dock="Top">
