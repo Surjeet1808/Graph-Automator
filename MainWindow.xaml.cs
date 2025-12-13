@@ -1196,7 +1196,6 @@ namespace GraphSimulator
                 UpdateScrollMeasureDisplay();
             }
         }
-        }
 
         /// <summary>
         /// Reset scroll measurement counter
