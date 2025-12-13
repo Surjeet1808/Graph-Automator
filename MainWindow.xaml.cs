@@ -21,20 +21,52 @@ namespace GraphSimulator
         [DllImport("user32.dll")]
         private static extern bool GetCursorPos(out POINT lpPoint);
 
+        // Windows API for setting up mouse hook
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, IntPtr hMod, uint dwThreadId);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        private const int WH_MOUSE_LL = 14;
+        private const int WM_MOUSEWHEEL = 0x020A;
+        private const int WM_MOUSEHWHEEL = 0x020E;
+
         [StructLayout(LayoutKind.Sequential)]
         private struct POINT
         {
             public int X;
             public int Y;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MSLLHOOKSTRUCT
+        {
+            public POINT pt;
+            public uint mouseData;
+            public uint flags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
         
         private MainViewModel? _viewModel;
         private Execute _executor = new Execute();
         private System.Windows.Threading.DispatcherTimer? _mousePositionTimer;
         private bool _isTrackingMousePosition = false;
-    private int _scrollMeasureAmount = 0;
-    private int _scrollMeasureHorizontalAmount = 0;
-    private bool _isScrollMeasureActive = false;
+        private int _scrollMeasureAmount = 0;
+        private int _scrollMeasureHorizontalAmount = 0;
+        private bool _isScrollMeasureActive = false;
+        private IntPtr _mouseHookID = IntPtr.Zero;
+        private LowLevelMouseProc? _mouseProc;
         
         public MainWindow()
         {
@@ -49,6 +81,9 @@ namespace GraphSimulator
             
             // Initialize mouse position timer
             InitializeMousePositionTracking();
+
+            // Handle cleanup when window closes
+            this.Closed += MainWindow_Closed;
 
             // Handle command-line file opening and auto-execution
             this.Loaded += async (s, e) =>
@@ -1142,16 +1177,23 @@ namespace GraphSimulator
             _scrollMeasureAmount = 0;
             _scrollMeasureHorizontalAmount = 0;
             ScrollMeasureText.Visibility = Visibility.Visible;
-            ScrollMeasureHorizontalText.Visibility = Visibility.Visible;
             ResetScrollButton.Visibility = Visibility.Visible;
-            ResetHScrollButton.Visibility = Visibility.Visible;
             UpdateScrollMeasureDisplay();
-            // Attach scroll event to the main window
-            this.PreviewMouseWheel += MainWindow_PreviewMouseWheel;
-            this.PreviewMouseWheel += MainWindow_PreviewMouseHWheel;
+            
+            // Set up global mouse hook for scroll events
+            _mouseProc = HookCallback;
+            using (var curProcess = System.Diagnostics.Process.GetCurrentProcess())
+            using (var curModule = curProcess.MainModule)
+            {
+                if (curModule != null)
+                {
+                    _mouseHookID = SetWindowsHookEx(WH_MOUSE_LL, _mouseProc, GetModuleHandle(curModule.ModuleName), 0);
+                }
+            }
+            
             if (_viewModel != null)
             {
-                _viewModel.StatusMessage = "Scroll measurement enabled - Use two-finger swipe or scroll wheel (vertical/horizontal)";
+                _viewModel.StatusMessage = "Scroll measurement enabled - Works globally outside application";
             }
         }
 
@@ -1162,12 +1204,15 @@ namespace GraphSimulator
         {
             _isScrollMeasureActive = false;
             ScrollMeasureText.Visibility = Visibility.Collapsed;
-            ScrollMeasureHorizontalText.Visibility = Visibility.Collapsed;
             ResetScrollButton.Visibility = Visibility.Collapsed;
-            ResetHScrollButton.Visibility = Visibility.Collapsed;
-            // Detach scroll event
-            this.PreviewMouseWheel -= MainWindow_PreviewMouseWheel;
-            this.PreviewMouseWheel -= MainWindow_PreviewMouseHWheel;
+            
+            // Unhook global mouse hook
+            if (_mouseHookID != IntPtr.Zero)
+            {
+                UnhookWindowsHookEx(_mouseHookID);
+                _mouseHookID = IntPtr.Zero;
+            }
+            
             if (_viewModel != null)
             {
                 _viewModel.StatusMessage = "Scroll measurement disabled";
@@ -1175,27 +1220,39 @@ namespace GraphSimulator
         }
 
         /// <summary>
-        /// Handle mouse wheel events for scroll measurement
+        /// Global mouse hook callback for capturing scroll events
         /// </summary>
-        private void MainWindow_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if (_isScrollMeasureActive)
+            if (nCode >= 0 && _isScrollMeasureActive)
             {
-                // Accumulate scroll delta (vertical)
-                _scrollMeasureAmount += e.Delta;
-                UpdateScrollMeasureDisplay();
+                if (wParam == (IntPtr)WM_MOUSEWHEEL)
+                {
+                    // Vertical scroll
+                    var hookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+                    int delta = (short)((hookStruct.mouseData >> 16) & 0xffff);
+                    
+                    Dispatcher.Invoke(() =>
+                    {
+                        _scrollMeasureAmount += delta;
+                        UpdateScrollMeasureDisplay();
+                    });
+                }
+                else if (wParam == (IntPtr)WM_MOUSEHWHEEL)
+                {
+                    // Horizontal scroll
+                    var hookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+                    int delta = (short)((hookStruct.mouseData >> 16) & 0xffff);
+                    
+                    Dispatcher.Invoke(() =>
+                    {
+                        _scrollMeasureHorizontalAmount += delta;
+                        UpdateScrollMeasureDisplay();
+                    });
+                }
             }
-        }
-
-        // Handle horizontal mouse wheel events (if supported)
-        private void MainWindow_PreviewMouseHWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (_isScrollMeasureActive)
-            {
-                // Accumulate horizontal scroll delta
-                _scrollMeasureHorizontalAmount += e.Delta;
-                UpdateScrollMeasureDisplay();
-            }
+            
+            return CallNextHookEx(_mouseHookID, nCode, wParam, lParam);
         }
 
         /// <summary>
@@ -1204,20 +1261,11 @@ namespace GraphSimulator
         private void ResetScroll_Click(object sender, RoutedEventArgs e)
         {
             _scrollMeasureAmount = 0;
-            UpdateScrollMeasureDisplay();
-            if (_viewModel != null)
-            {
-                _viewModel.StatusMessage = "Scroll counter reset to 0";
-            }
-        }
-
-        private void ResetHScroll_Click(object sender, RoutedEventArgs e)
-        {
             _scrollMeasureHorizontalAmount = 0;
             UpdateScrollMeasureDisplay();
             if (_viewModel != null)
             {
-                _viewModel.StatusMessage = "Horizontal scroll counter reset to 0";
+                _viewModel.StatusMessage = "Scroll counters reset to 0";
             }
         }
 
@@ -1226,8 +1274,20 @@ namespace GraphSimulator
         /// </summary>
         private void UpdateScrollMeasureDisplay()
         {
-            ScrollMeasureText.Text = $"Scroll: {_scrollMeasureAmount} (↑positive / ↓negative)";
-            ScrollMeasureHorizontalText.Text = $"HScroll: {_scrollMeasureHorizontalAmount} (→positive / ←negative)";
+            ScrollMeasureText.Text = $"Scroll V:{_scrollMeasureAmount} H:{_scrollMeasureHorizontalAmount}";
+        }
+
+        /// <summary>
+        /// Cleanup when window is closed
+        /// </summary>
+        private void MainWindow_Closed(object? sender, EventArgs e)
+        {
+            // Unhook global mouse hook if active
+            if (_mouseHookID != IntPtr.Zero)
+            {
+                UnhookWindowsHookEx(_mouseHookID);
+                _mouseHookID = IntPtr.Zero;
+            }
         }
 
         #endregion

@@ -83,11 +83,8 @@
             <TextBlock x:Name="MousePositionText" VerticalAlignment="Center" Margin="8,0" Foreground="#007ACC" FontWeight="Bold" Text="X: 0, Y: 0" Visibility="Collapsed"/>
             <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
             <CheckBox x:Name="ScrollMeasureCheckBox" Content="Scroll Measure" VerticalAlignment="Center" Margin="8,0" Checked="ScrollMeasure_Checked" Unchecked="ScrollMeasure_Unchecked" ToolTip="Measure scroll amount for automation"/>
-            <TextBlock x:Name="ScrollMeasureText" VerticalAlignment="Center" Margin="8,0" Foreground="#FF5722" FontWeight="Bold" Text="Scroll: 0" Visibility="Collapsed"/>
+            <TextBlock x:Name="ScrollMeasureText" VerticalAlignment="Center" Margin="8,0" Foreground="#007ACC" FontWeight="Bold" Text="Scroll: 0" Visibility="Collapsed"/>
             <Button x:Name="ResetScrollButton" Content="Reset" Padding="4,2" Margin="4,0" Click="ResetScroll_Click" Visibility="Collapsed" ToolTip="Reset scroll counter"/>
-            <!-- Horizontal scroll measurement controls -->
-            <TextBlock x:Name="ScrollMeasureHorizontalText" VerticalAlignment="Center" Margin="8,0" Foreground="#9C27B0" FontWeight="Bold" Text="HScroll: 0" Visibility="Collapsed"/>
-            <Button x:Name="ResetHScrollButton" Content="Reset H" Padding="4,2" Margin="4,0" Click="ResetHScroll_Click" Visibility="Collapsed" ToolTip="Reset horizontal scroll counter"/>
         </StackPanel>
 
         <StatusBar DockPanel.Dock="Bottom" Background="#F5F5F5">
