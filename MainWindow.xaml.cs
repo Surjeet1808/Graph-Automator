@@ -1,6 +1,7 @@
 using GraphSimulator.ViewModels;
 using GraphSimulator.Models;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -555,72 +556,92 @@ namespace GraphSimulator
 
                 _viewModel.StatusMessage = $"Execution completed. {operations.Count} operation(s) executed successfully.";
 
-                MessageBox.Show(
-                    $"Execution completed successfully!\n\n{operations.Count} operation(s) executed.",
-                    "Execution Complete",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
+                // Only show message box if not auto-executed from command line
+                if (!App.AutoExecute)
+                {
+                    MessageBox.Show(
+                        $"Execution completed successfully!\n\n{operations.Count} operation(s) executed.",
+                        "Execution Complete",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+                }
+                else
+                {
+                    // Auto-close application after execution
+                    await Task.Delay(500); // Brief delay to ensure execution completes
+                    Application.Current.Shutdown();
+                }
             }
             catch (Exception ex)
             {
                 _viewModel!.StatusMessage = $"Execution failed: {ex.Message}";
                 
-                // Determine failure type and show appropriate message
-                string failureType = "Unknown Error";
-                string failureDetails = ex.Message;
-                MessageBoxImage icon = MessageBoxImage.Error;
+                // Only show error message box if not auto-executed
+                if (!App.AutoExecute)
+                {
+                    // Determine failure type and show appropriate message
+                    string failureType = "Unknown Error";
+                    string failureDetails = ex.Message;
+                    MessageBoxImage icon = MessageBoxImage.Error;
 
-                if (ex is System.IO.FileNotFoundException)
-                {
-                    failureType = "File Not Found";
-                    icon = MessageBoxImage.Warning;
-                }
-                else if (ex.Message.Contains("CIRCULAR DEPENDENCY"))
-                {
-                    failureType = "Circular Dependency Detected";
-                    icon = MessageBoxImage.Warning;
-                }
-                else if (ex.Message.Contains("GraphFilePath is required"))
-                {
-                    failureType = "Missing Graph File Path";
-                    icon = MessageBoxImage.Warning;
-                }
-                else if (ex.Message.Contains("Failed to load graph"))
-                {
-                    failureType = "Graph Loading Failed";
-                    icon = MessageBoxImage.Error;
-                }
-                else if (ex.Message.Contains("Invalid JSON data"))
-                {
-                    failureType = "Invalid Node Data";
-                    icon = MessageBoxImage.Error;
-                }
-                else if (ex.Message.Contains("No valid operations"))
-                {
-                    failureType = "Empty or Invalid Graph";
-                    icon = MessageBoxImage.Warning;
-                }
-                else if (ex is InvalidOperationException)
-                {
-                    failureType = "Operation Failed";
-                    icon = MessageBoxImage.Error;
-                }
-                else if (ex is ArgumentException)
-                {
-                    failureType = "Invalid Configuration";
-                    icon = MessageBoxImage.Warning;
-                }
+                    if (ex is System.IO.FileNotFoundException)
+                    {
+                        failureType = "File Not Found";
+                        icon = MessageBoxImage.Warning;
+                    }
+                    else if (ex.Message.Contains("CIRCULAR DEPENDENCY"))
+                    {
+                        failureType = "Circular Dependency Detected";
+                        icon = MessageBoxImage.Warning;
+                    }
+                    else if (ex.Message.Contains("GraphFilePath is required"))
+                    {
+                        failureType = "Missing Graph File Path";
+                        icon = MessageBoxImage.Warning;
+                    }
+                    else if (ex.Message.Contains("Failed to load graph"))
+                    {
+                        failureType = "Graph Loading Failed";
+                        icon = MessageBoxImage.Error;
+                    }
+                    else if (ex.Message.Contains("Invalid JSON data"))
+                    {
+                        failureType = "Invalid Node Data";
+                        icon = MessageBoxImage.Error;
+                    }
+                    else if (ex.Message.Contains("No valid operations"))
+                    {
+                        failureType = "Empty or Invalid Graph";
+                        icon = MessageBoxImage.Warning;
+                    }
+                    else if (ex is InvalidOperationException)
+                    {
+                        failureType = "Operation Failed";
+                        icon = MessageBoxImage.Error;
+                    }
+                    else if (ex is ArgumentException)
+                    {
+                        failureType = "Invalid Configuration";
+                        icon = MessageBoxImage.Warning;
+                    }
 
-                MessageBox.Show(
-                    $"❌ Execution Failed\n\n" +
-                    $"Failure Type: {failureType}\n\n" +
-                    $"Details:\n{failureDetails}\n\n" +
-                    $"Please fix the issue and try again.",
-                    $"Execution Error - {failureType}",
-                    MessageBoxButton.OK,
-                    icon
-                );
+                    MessageBox.Show(
+                        $"❌ Execution Failed\n\n" +
+                        $"Failure Type: {failureType}\n\n" +
+                        $"Details:\n{failureDetails}\n\n" +
+                        $"Please fix the issue and try again.",
+                        $"Execution Error - {failureType}",
+                        MessageBoxButton.OK,
+                        icon
+                    );
+                }
+                else
+                {
+                    // Auto-close even on error when run from command line
+                    await Task.Delay(500);
+                    Application.Current.Shutdown(1); // Exit with error code 1
+                }
             }
         }
 
