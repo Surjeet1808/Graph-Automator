@@ -59,6 +59,8 @@ namespace GraphSimulator.Models
             "mouse_move",
             "scroll_up",
             "scroll_down",
+            "scroll_left",
+            "scroll_right",
             "key_press",
             "key_down",
             "key_up",
@@ -79,6 +81,8 @@ namespace GraphSimulator.Models
     { "mouse_move",        "#2B4F7C" }, // dark steel blue - mouse movement
     { "scroll_up",         "#2D5016" }, // dark forest green - scroll up
     { "scroll_down",       "#1F3A0F" }, // very dark green - scroll down
+    { "scroll_left",       "#3A5A1F" }, // dark olive green - scroll left
+    { "scroll_right",      "#254010" }, // dark moss green - scroll right
     { "key_press",         "#7A2E2E" }, // dark brick red - key action
     { "key_down",          "#5A1F1F" }, // very dark red - key down
     { "key_up",            "#8B3A3A" }, // dark crimson - key up

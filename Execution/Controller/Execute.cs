@@ -100,6 +100,16 @@ namespace GraphSimulator.Execution.Controller
                         WpfInputHelper.Scroll(-downAmount);
                         break;
 
+                    case "scroll_left":
+                        int leftAmount = operation.IntValues.Length > 0 ? operation.IntValues[0] : 120;
+                        WpfInputHelper.ScrollHorizontal(-leftAmount);
+                        break;
+
+                    case "scroll_right":
+                        int rightAmount = operation.IntValues.Length > 0 ? operation.IntValues[0] : 120;
+                        WpfInputHelper.ScrollHorizontal(rightAmount);
+                        break;
+
                     case "key_press":
                         ValidateIntValues(operation, 1, "key_press requires a key code");
                         WpfInputHelper.PressKey((byte)operation.IntValues[0]);

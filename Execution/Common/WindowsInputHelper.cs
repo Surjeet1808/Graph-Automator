@@ -37,6 +37,7 @@ namespace GraphSimulator.Execution.Controller
         private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
         private const int MOUSEEVENTF_RIGHTUP = 0x10;
         private const int MOUSEEVENTF_WHEEL = 0x0800;
+        private const int MOUSEEVENTF_HWHEEL = 0x01000; // Horizontal wheel
 
         private const uint KEYEVENTF_KEYDOWN = 0x0000;
         private const uint KEYEVENTF_KEYUP = 0x0002;
@@ -98,6 +99,11 @@ namespace GraphSimulator.Execution.Controller
         public static void Scroll(int delta)
         {
             mouse_event(MOUSEEVENTF_WHEEL, 0, 0, delta, 0);
+        }
+
+        public static void ScrollHorizontal(int delta)
+        {
+            mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, delta, 0);
         }
 
         public static void KeyDown(byte virtualKeyCode)

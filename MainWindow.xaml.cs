@@ -32,6 +32,8 @@ namespace GraphSimulator
         private Execute _executor = new Execute();
         private System.Windows.Threading.DispatcherTimer? _mousePositionTimer;
         private bool _isTrackingMousePosition = false;
+        private int _scrollMeasureAmount = 0;
+        private bool _isScrollMeasureActive = false;
         
         public MainWindow()
         {
@@ -957,6 +959,8 @@ namespace GraphSimulator
                     break;
                 case "scroll_up":
                 case "scroll_down":
+                case "scroll_left":
+                case "scroll_right":
                     ScrollOperationFields.Visibility = Visibility.Visible;
                     break;
                 case "key_press":
@@ -1122,6 +1126,85 @@ namespace GraphSimulator
                 // Ignore any errors in getting mouse position
             }
         }
+
+        #endregion
+
+        #region Scroll Measurement
+
+        /// <summary>
+        /// Event handler for when the Scroll Measure checkbox is checked
+        /// </summary>
+        private void ScrollMeasure_Checked(object sender, RoutedEventArgs e)
+        {
+            _isScrollMeasureActive = true;
+            _scrollMeasureAmount = 0;
+            ScrollMeasureText.Visibility = Visibility.Visible;
+            ResetScrollButton.Visibility = Visibility.Visible;
+            UpdateScrollMeasureDisplay();
+            
+            // Attach scroll event to the main window
+            this.PreviewMouseWheel += MainWindow_PreviewMouseWheel;
+            
+            if (_viewModel != null)
+            {
+                _viewModel.StatusMessage = "Scroll measurement enabled - Use two-finger swipe or scroll wheel";
+            }
+        }
+
+        /// <summary>
+        /// Event handler for when the Scroll Measure checkbox is unchecked
+        /// </summary>
+        private void ScrollMeasure_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _isScrollMeasureActive = false;
+            ScrollMeasureText.Visibility = Visibility.Collapsed;
+            ResetScrollButton.Visibility = Visibility.Collapsed;
+            
+            // Detach scroll event
+            this.PreviewMouseWheel -= MainWindow_PreviewMouseWheel;
+            
+            if (_viewModel != null)
+            {
+                _viewModel.StatusMessage = "Scroll measurement disabled";
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse wheel events for scroll measurement
+        /// </summary>
+        private void MainWindow_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (_isScrollMeasureActive)
+            {
+                // Accumulate scroll delta
+                _scrollMeasureAmount += e.Delta;
+                UpdateScrollMeasureDisplay();
+            }
+        }
+
+        /// <summary>
+        /// Reset scroll measurement counter
+        /// </summary>
+        private void ResetScroll_Click(object sender, RoutedEventArgs e)
+        {
+            _scrollMeasureAmount = 0;
+            UpdateScrollMeasureDisplay();
+            
+            if (_viewModel != null)
+            {
+                _viewModel.StatusMessage = "Scroll counter reset to 0";
+            }
+        }
+
+        /// <summary>
+        /// Update the scroll measurement display
+        /// </summary>
+        private void UpdateScrollMeasureDisplay()
+        {
+            ScrollMeasureText.Text = $"Scroll: {_scrollMeasureAmount} (↑positive / ↓negative)";
+        }
+
+        #endregion
 
         /// <summary>
         /// Handles Browse button click to select a graph file

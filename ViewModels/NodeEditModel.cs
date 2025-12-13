@@ -111,6 +111,8 @@ namespace GraphSimulator.ViewModels
                     break;
                 case "scroll_up":
                 case "scroll_down":
+                case "scroll_left":
+                case "scroll_right":
                     ScrollAmount = 120;
                     break;
                 case "key_press":
