@@ -45,6 +45,21 @@ namespace GraphSimulator
             // Initialize mouse position timer
             InitializeMousePositionTracking();
 
+            // Handle command-line file opening and auto-execution
+            this.Loaded += async (s, e) =>
+            {
+                if (!string.IsNullOrEmpty(App.FileToOpen))
+                {
+                    await _viewModel.LoadGraphFromFileAsync(App.FileToOpen);
+                    
+                    if (App.AutoExecute)
+                    {
+                        // Auto-execute the graph
+                        _viewModel.ExecuteGraphCommand.Execute(null);
+                    }
+                }
+            };
+
             // Render the initial graph on the canvas control
             try
             {
@@ -1119,6 +1134,62 @@ namespace GraphSimulator
             catch (Exception ex)
             {
                 MessageBox.Show($"Error selecting graph file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Saves the graph as an executable file with a .bat launcher
+        /// </summary>
+        private void SaveAsExecutable_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel == null)
+                return;
+
+            try
+            {
+                var dialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "Graph Files (*.json)|*.json",
+                    Title = "Save Graph as Executable",
+                    DefaultExt = ".json"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    // Save the graph file
+                    _viewModel.SaveGraphToFileAsync(dialog.FileName);
+
+                    // Get the directory and file name
+                    string directory = System.IO.Path.GetDirectoryName(dialog.FileName) ?? "";
+                    string graphFileName = System.IO.Path.GetFileName(dialog.FileName);
+                    string batFileName = System.IO.Path.ChangeExtension(graphFileName, ".bat");
+                    string batFilePath = System.IO.Path.Combine(directory, batFileName);
+
+                    // Get the application executable path
+                    string appPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    appPath = appPath.Replace(".dll", ".exe"); // Handle .NET Core/5+ case
+
+                    // Create a batch file to launch the application with the graph file
+                    string batContent = $"@echo off\r\n\"{appPath}\" \"%~dp0{graphFileName}\" --execute\r\n";
+                    System.IO.File.WriteAllText(batFilePath, batContent);
+
+                    MessageBox.Show(
+                        $"Executable graph saved successfully!\n\n" +
+                        $"Graph File: {graphFileName}\n" +
+                        $"Launcher: {batFileName}\n\n" +
+                        $"Double-click '{batFileName}' to execute the graph.\n" +
+                        $"Open '{graphFileName}' in the application to edit.",
+                        "Success",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+
+                    _viewModel.StatusMessage = $"Executable graph saved to {batFileName}";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving executable graph: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

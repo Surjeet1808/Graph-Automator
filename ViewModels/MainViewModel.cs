@@ -724,33 +724,49 @@ namespace GraphSimulator.ViewModels
 
                 if (dialog.ShowDialog() == true)
                 {
-                    StatusMessage = "Loading graph...";
-                    var graph = await _fileService.LoadGraphAsync(dialog.FileName);
-                    if (graph != null)
-                    {
-                        // Reinitialize ports for all nodes after deserialization
-                        foreach (var node in graph.Nodes)
-                        {
-                            ReinitializeNodePorts(node);
-                        }
-                        CurrentGraph = graph;
-                    }
-                    else
-                    {
-                        CurrentGraph = new Graph();
-                    }
-                    _currentFilePath = dialog.FileName;
-                    _fileService.SaveRecentFile(dialog.FileName);
-                    LoadRecentFiles();
-                    _commandHistory.Clear();
-                    StatusMessage = $"Graph loaded from {System.IO.Path.GetFileName(dialog.FileName)}";
-                    UpdateStatistics();
-                    OnPropertyChanged(nameof(AvailableNodeTypes));
+                    await LoadGraphFromFileAsync(dialog.FileName);
                 }
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Error loading graph: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Loads a graph from a specific file path
+        /// </summary>
+        public async Task LoadGraphFromFileAsync(string filePath)
+        {
+            try
+            {
+                StatusMessage = "Loading graph...";
+                var graph = await _fileService.LoadGraphAsync(filePath);
+                if (graph != null)
+                {
+                    // Reinitialize ports for all nodes after deserialization
+                    foreach (var node in graph.Nodes)
+                    {
+                        ReinitializeNodePorts(node);
+                    }
+                    CurrentGraph = graph;
+                }
+                else
+                {
+                    CurrentGraph = new Graph();
+                }
+                _currentFilePath = filePath;
+                _fileService.SaveRecentFile(filePath);
+                LoadRecentFiles();
+                _commandHistory.Clear();
+                StatusMessage = $"Graph loaded from {System.IO.Path.GetFileName(filePath)}";
+                UpdateStatistics();
+                OnPropertyChanged(nameof(AvailableNodeTypes));
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error loading graph: {ex.Message}";
+                MessageBox.Show($"Failed to load graph from {filePath}:\n{ex.Message}", "Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -823,17 +839,33 @@ namespace GraphSimulator.ViewModels
 
                 if (dialog.ShowDialog() == true)
                 {
-                    StatusMessage = "Saving graph...";
-                    await _fileService.SaveGraphAsync(CurrentGraph, dialog.FileName);
-                    _currentFilePath = dialog.FileName;
-                    _fileService.SaveRecentFile(dialog.FileName);
-                    LoadRecentFiles();
-                    StatusMessage = $"Graph saved to {System.IO.Path.GetFileName(dialog.FileName)}";
+                    await SaveGraphToFileAsync(dialog.FileName);
                 }
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Error saving graph: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Saves the graph to a specific file path
+        /// </summary>
+        public async Task SaveGraphToFileAsync(string filePath)
+        {
+            try
+            {
+                StatusMessage = "Saving graph...";
+                await _fileService.SaveGraphAsync(CurrentGraph, filePath);
+                _currentFilePath = filePath;
+                _fileService.SaveRecentFile(filePath);
+                LoadRecentFiles();
+                StatusMessage = $"Graph saved to {System.IO.Path.GetFileName(filePath)}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error saving graph: {ex.Message}";
+                throw;
             }
         }
 

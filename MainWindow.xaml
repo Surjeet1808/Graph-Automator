@@ -26,6 +26,7 @@
                 <MenuItem Header="_Open" InputGestureText="Ctrl+O" Command="{Binding OpenGraphCommand}"/>
                 <MenuItem Header="_Save" InputGestureText="Ctrl+S" Command="{Binding SaveGraphCommand}"/>
                 <MenuItem Header="Save _As" InputGestureText="Ctrl+Shift+S" Command="{Binding SaveGraphAsCommand}"/>
+                <MenuItem Header="Save as _Executable" Click="SaveAsExecutable_Click" ToolTip="Save as executable graph file"/>
                 <Separator/>
                 <MenuItem Header="_Export">
                     <MenuItem Header="_SVG" Command="{Binding ExportSvgCommand}"/>
