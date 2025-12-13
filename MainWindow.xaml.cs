@@ -1185,8 +1185,9 @@ namespace GraphSimulator
                 _scrollMeasureAmount += e.Delta;
                 UpdateScrollMeasureDisplay();
             }
+        }
 
-            // Handle horizontal mouse wheel events (if supported)
+        // Handle horizontal mouse wheel events (if supported)
         private void MainWindow_PreviewMouseHWheel(object sender, MouseWheelEventArgs e)
         {
             if (_isScrollMeasureActive)
