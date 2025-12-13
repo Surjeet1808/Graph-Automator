@@ -42,25 +42,7 @@ namespace GraphSimulator
             _viewModel = new GraphSimulator.ViewModels.MainViewModel();
             DataContext = _viewModel;
 
-            // Wire up toolbar tab switching
-            ToolbarTabControl.SelectionChanged += (s, e) =>
-            {
-                if (ToolbarTabControl.SelectedIndex == 0)
-                {
-                    // Show control buttons
-                    var panel = (StackPanel)FindResource("ControlButtonsPanel");
-                    ToolbarTabContent.Content = panel;
-                }
-                else if (ToolbarTabControl.SelectedIndex == 1)
-                {
-                    // Show mouse/scroll
-                    var panel = (StackPanel)FindResource("MouseScrollPanel");
-                    ToolbarTabContent.Content = panel;
-                }
-            };
-            // Set initial tab content
-            ToolbarTabControl.SelectedIndex = 0;
-            ToolbarTabContent.Content = (StackPanel)FindResource("ControlButtonsPanel");
+            // ...existing code...
             // Subscribe to execution event
             _viewModel.ExecutionRequested += OnExecutionRequested;
             

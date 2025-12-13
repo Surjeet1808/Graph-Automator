@@ -19,9 +19,8 @@
     </Window.Resources>
     
     <DockPanel>
-        <!-- Menu Bar and Toolbar Tabs Row -->
-        <DockPanel DockPanel.Dock="Top" LastChildFill="False">
-        <Menu Background="#F5F5F5" DockPanel.Dock="Left">
+    <!-- Menu Bar -->
+    <Menu DockPanel.Dock="Top" Background="#F5F5F5">
             <MenuItem Header="_File">
                 <MenuItem Header="_New" InputGestureText="Ctrl+N" Command="{Binding NewGraphCommand}"/>
                 <MenuItem Header="_Open" InputGestureText="Ctrl+O" Command="{Binding OpenGraphCommand}"/>
@@ -58,20 +57,10 @@
                 <MenuItem Header="Dark _Mode" IsCheckable="True" IsChecked="{Binding IsDarkMode}" Click="MenuItem_DarkMode_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_About" Click="MenuItem_About_Click"/>
-            </MenuItem>
+            <MenuItem Header="_About" Click="MenuItem_About_Click"/>
         </Menu>
-        <!-- Toolbar Tabs: Place to the right of the menu bar -->
-        <TabControl x:Name="ToolbarTabControl" Width="Auto" Margin="16,0,0,0" Background="Transparent" BorderThickness="0" Height="32" VerticalAlignment="Top" DockPanel.Dock="Right">
-            <TabItem Header="Control Buttons" Height="32"/>
-            <TabItem Header="Mouse &amp; Scroll" Height="32"/>
-        </TabControl>
-        </DockPanel>
-
-    <!-- Toolbar Options Row: Show content of selected tab below menu bar -->
-    <ContentControl x:Name="ToolbarTabContent" DockPanel.Dock="Top" />
-        <!-- Toolbar Tab Contents (hidden by default, shown by code-behind) -->
-        <StackPanel x:Name="ControlButtonsPanel" Orientation="Horizontal" Background="#F5F5F5" Height="48" Visibility="Collapsed">
+        <!-- Toolbar: All controls in a single horizontal row below the menu bar -->
+        <StackPanel Orientation="Horizontal" Background="#F5F5F5" Height="48" DockPanel.Dock="Top">
             <Button Margin="8" Padding="8" Command="{Binding NewGraphCommand}" ToolTip="New Graph (Ctrl+N)">New</Button>
             <Button Margin="8" Padding="8" Command="{Binding OpenGraphCommand}" ToolTip="Open Graph (Ctrl+O)">Open</Button>
             <Button Margin="8" Padding="8" Command="{Binding SaveGraphCommand}" ToolTip="Save (Ctrl+S)">Save</Button>
@@ -82,10 +71,13 @@
             <Button Margin="8" Padding="8" Command="{Binding AddNodeCommand}" ToolTip="Add Node">Add Node</Button>
             <Button Margin="8" Padding="8" Command="{Binding StartExecutionCommand}" ToolTip="Execute graph operations in sequence" Background="#4CAF50" Foreground="White" FontWeight="Bold">▶ Start Execution</Button>
             <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
+            <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
             <Label VerticalAlignment="Center" Margin="8,0">Zoom:</Label>
             <TextBlock VerticalAlignment="Center" Text="{Binding CanvasZoom}" Margin="0,0,8,0"/>
         </StackPanel>
-        <StackPanel x:Name="MouseScrollPanel" Orientation="Horizontal" Background="#F5F5F5" Height="48" Visibility="Collapsed">
+
+        <!-- Mouse and Scroll Controls Row -->
+        <StackPanel Orientation="Horizontal" Background="#F9F9F9" Height="40" DockPanel.Dock="Top">
             <CheckBox x:Name="ShowMousePositionCheckBox" Content="Show Mouse Position" VerticalAlignment="Center" Margin="8,0" Checked="ShowMousePosition_Checked" Unchecked="ShowMousePosition_Unchecked" ToolTip="Display real-time mouse coordinates"/>
             <TextBlock x:Name="MousePositionText" VerticalAlignment="Center" Margin="8,0" Foreground="#007ACC" FontWeight="Bold" Text="X: 0, Y: 0" Visibility="Collapsed"/>
             <Separator Margin="4,0" Width="1" Background="#CCCCCC"/>
