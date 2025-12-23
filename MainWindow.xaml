@@ -236,49 +236,56 @@
                                             <Label Content="Select Dynamic Source Type:" FontWeight="Bold" Margin="0,4,0,2"/>
                                             <ComboBox x:Name="DynamicSourceTypeCombo" Padding="6" SelectionChanged="DynamicSourceType_Changed" SelectedIndex="0">
                                                 <ComboBoxItem Tag="DateBasedArray">
-                                                    <StackPanel>
-                                                        <TextBlock Text="📅 Date-Based Array" FontWeight="Bold"/>
-                                                        <TextBlock Text="Values change daily based on start date" FontSize="9" Foreground="Gray"/>
-                                                    </StackPanel>
+                                                    <TextBlock>
+                                                        <Run Text="Date-Based Array" FontWeight="Bold"/>
+                                                        <LineBreak/>
+                                                        <Run Text="Values change daily based on start date" FontSize="9" Foreground="Gray"/>
+                                                    </TextBlock>
                                                 </ComboBoxItem>
                                                 <ComboBoxItem Tag="IterationBasedArray" IsEnabled="False">
-                                                    <StackPanel>
-                                                        <TextBlock Text="🔄 Iteration-Based Array (In Development)" Foreground="Gray"/>
-                                                        <TextBlock Text="Cycle through array with each execution" FontSize="9" Foreground="LightGray"/>
-                                                    </StackPanel>
+                                                    <TextBlock Foreground="Gray">
+                                                        <Run Text="Iteration-Based Array (In Development)"/>
+                                                        <LineBreak/>
+                                                        <Run Text="Cycle through array with each execution" FontSize="9" Foreground="LightGray"/>
+                                                    </TextBlock>
                                                 </ComboBoxItem>
                                                 <ComboBoxItem Tag="API" IsEnabled="False">
-                                                    <StackPanel>
-                                                        <TextBlock Text="🌐 API Source (In Development)" Foreground="Gray"/>
-                                                        <TextBlock Text="Fetch values from REST API endpoints" FontSize="9" Foreground="LightGray"/>
-                                                    </StackPanel>
+                                                    <TextBlock Foreground="Gray">
+                                                        <Run Text="API Source (In Development)"/>
+                                                        <LineBreak/>
+                                                        <Run Text="Fetch values from REST API endpoints" FontSize="9" Foreground="LightGray"/>
+                                                    </TextBlock>
                                                 </ComboBoxItem>
                                                 <ComboBoxItem Tag="ExcelFile" IsEnabled="False">
-                                                    <StackPanel>
-                                                        <TextBlock Text="📊 Excel/CSV File (In Development)" Foreground="Gray"/>
-                                                        <TextBlock Text="Read values from spreadsheet files" FontSize="9" Foreground="LightGray"/>
-                                                    </StackPanel>
+                                                    <TextBlock Foreground="Gray">
+                                                        <Run Text="Excel/CSV File (In Development)"/>
+                                                        <LineBreak/>
+                                                        <Run Text="Read values from spreadsheet files" FontSize="9" Foreground="LightGray"/>
+                                                    </TextBlock>
                                                 </ComboBoxItem>
                                                 <ComboBoxItem Tag="ConditionBased" IsEnabled="False">
-                                                    <StackPanel>
-                                                        <TextBlock Text="⚙️ Condition-Based Calculation (In Development)" Foreground="Gray"/>
-                                                        <TextBlock Text="Calculate values based on custom conditions" FontSize="9" Foreground="LightGray"/>
-                                                    </StackPanel>
+                                                    <TextBlock Foreground="Gray">
+                                                        <Run Text="Condition-Based Calculation (In Development)"/>
+                                                        <LineBreak/>
+                                                        <Run Text="Calculate values based on custom conditions" FontSize="9" Foreground="LightGray"/>
+                                                    </TextBlock>
                                                 </ComboBoxItem>
                                                 <ComboBoxItem Tag="DateExpression" IsEnabled="False">
-                                                    <StackPanel>
-                                                        <TextBlock Text="📆 Date Expression (In Development)" Foreground="Gray"/>
-                                                        <TextBlock Text="Calculate using date/time formulas" FontSize="9" Foreground="LightGray"/>
-                                                    </StackPanel>
+                                                    <TextBlock Foreground="Gray">
+                                                        <Run Text="Date Expression (In Development)"/>
+                                                        <LineBreak/>
+                                                        <Run Text="Calculate using date/time formulas" FontSize="9" Foreground="LightGray"/>
+                                                    </TextBlock>
                                                 </ComboBoxItem>
                                                 <ComboBoxItem Tag="Expression" IsEnabled="False">
-                                                    <StackPanel>
-                                                        <TextBlock Text="💻 Custom Expression (In Development)" Foreground="Gray"/>
-                                                        <TextBlock Text="Use C# expressions for complex logic" FontSize="9" Foreground="LightGray"/>
-                                                    </StackPanel>
+                                                    <TextBlock Foreground="Gray">
+                                                        <Run Text="Custom Expression (In Development)"/>
+                                                        <LineBreak/>
+                                                        <Run Text="Use C# expressions for complex logic" FontSize="9" Foreground="LightGray"/>
+                                                    </TextBlock>
                                                 </ComboBoxItem>
                                             </ComboBox>
-                                            <TextBlock Text="✅ Date-Based Array is fully functional | 🚧 Other types are in development" 
+                                            <TextBlock Text="✓ Date-Based Array is fully functional | Other types are in development" 
                                                        FontSize="10" 
                                                        Foreground="Gray" 
                                                        Margin="0,4,0,12" 
@@ -286,7 +293,7 @@
                                             
                                             <!-- Date-Based Array Configuration -->
                                             <StackPanel x:Name="DateBasedArrayConfig" Visibility="Visible" Margin="0,8,0,0">
-                                                <TextBlock Text="📅 Date-Based Array Configuration" FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                                                <TextBlock Text="Date-Based Array Configuration" FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
                                                 <TextBlock Text="Values are selected based on days elapsed since start date." FontSize="10" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap"/>
                                                 
                                                 <Label Content="Start Date:" FontWeight="Bold" Margin="0,4,0,2"/>
@@ -332,7 +339,7 @@
                                             <StackPanel x:Name="InDevelopmentPlaceholder" Visibility="Collapsed" Margin="0,8,0,0">
                                                 <Border BorderBrush="#FFA500" BorderThickness="2" CornerRadius="4" Padding="20" Background="#FFF8DC">
                                                     <StackPanel HorizontalAlignment="Center">
-                                                        <TextBlock Text="🚧 IN DEVELOPMENT" FontWeight="Bold" FontSize="16" Foreground="#FF8C00" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                                        <TextBlock Text="IN DEVELOPMENT" FontWeight="Bold" FontSize="16" Foreground="#FF8C00" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                                                         <TextBlock Text="This dynamic source type is currently being developed." 
                                                                    FontSize="12" 
                                                                    Foreground="#555" 
@@ -348,7 +355,7 @@
                                                                    TextWrapping="Wrap"
                                                                    TextAlignment="Center"
                                                                    Margin="0,8,0,0"/>
-                                                        <TextBlock Text="✅ Date-Based Array is fully functional and ready to use!" 
+                                                        <TextBlock Text="✓ Date-Based Array is fully functional and ready to use!" 
                                                                    FontSize="10" 
                                                                    Foreground="#4CAF50" 
                                                                    FontWeight="Bold"
