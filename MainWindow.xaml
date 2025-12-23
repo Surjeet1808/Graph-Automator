@@ -16,6 +16,7 @@
     <Window.Resources>
         <utilities:IsNotNullConverter x:Key="IsNotNullConverter" />
         <utilities:LinkInfoConverter x:Key="LinkInfoConverter" />
+        <utilities:StringToBoolConverter x:Key="StringToBoolConverter" />
     </Window.Resources>
     
     <DockPanel>
@@ -210,8 +211,157 @@
                                         <Rectangle Grid.Column="1" Margin="8" Fill="{Binding SelectedNodeEdit.Color}"/>
                                     </Grid>
 
+                                    <!-- Value Mode Selection -->
+                                    <Border BorderBrush="#007ACC" BorderThickness="2" CornerRadius="4" Padding="12" Margin="0,16,0,0" Background="#E3F2FD">
+                                        <StackPanel>
+                                            <TextBlock Text="Value Mode" FontWeight="Bold" FontSize="13" Margin="0,0,0,8" Foreground="#007ACC"/>
+                                            
+                                            <RadioButton x:Name="StaticValueMode" Content="Static Values" 
+                                                         IsChecked="{Binding SelectedNodeEdit.ValueMode, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Static'}" 
+                                                         GroupName="ValueMode" Margin="0,4" Checked="ValueMode_Changed"/>
+                                            <TextBlock Text="Enter fixed values manually" FontSize="10" Foreground="Gray" Margin="20,0,0,8"/>
+                                            
+                                            <RadioButton x:Name="DynamicValueMode" Content="Dynamic Values" 
+                                                         IsChecked="{Binding SelectedNodeEdit.ValueMode, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Dynamic'}" 
+                                                         GroupName="ValueMode" Margin="0,4" Checked="ValueMode_Changed"/>
+                                            <TextBlock Text="Get values from data source (API, date-based array, etc.)" FontSize="10" Foreground="Gray" Margin="20,0,0,8"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Dynamic Source Configuration (shown only when Dynamic mode is selected) -->
+                                    <Border x:Name="DynamicSourcePanel" BorderBrush="#FF9800" BorderThickness="2" CornerRadius="4" Padding="12" Margin="0,12,0,0" Background="#FFF3E0" Visibility="Collapsed">
+                                        <StackPanel>
+                                            <TextBlock Text="Dynamic Source Configuration" FontWeight="Bold" FontSize="13" Margin="0,0,0,8" Foreground="#FF9800"/>
+                                            
+                                            <Label Content="Select Dynamic Source Type:" FontWeight="Bold" Margin="0,4,0,2"/>
+                                            <ComboBox x:Name="DynamicSourceTypeCombo" Padding="6" SelectionChanged="DynamicSourceType_Changed" SelectedIndex="0">
+                                                <ComboBoxItem Tag="DateBasedArray">
+                                                    <StackPanel>
+                                                        <TextBlock Text="📅 Date-Based Array" FontWeight="Bold"/>
+                                                        <TextBlock Text="Values change daily based on start date" FontSize="9" Foreground="Gray"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                                <ComboBoxItem Tag="IterationBasedArray" IsEnabled="False">
+                                                    <StackPanel>
+                                                        <TextBlock Text="🔄 Iteration-Based Array (In Development)" Foreground="Gray"/>
+                                                        <TextBlock Text="Cycle through array with each execution" FontSize="9" Foreground="LightGray"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                                <ComboBoxItem Tag="API" IsEnabled="False">
+                                                    <StackPanel>
+                                                        <TextBlock Text="🌐 API Source (In Development)" Foreground="Gray"/>
+                                                        <TextBlock Text="Fetch values from REST API endpoints" FontSize="9" Foreground="LightGray"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                                <ComboBoxItem Tag="ExcelFile" IsEnabled="False">
+                                                    <StackPanel>
+                                                        <TextBlock Text="📊 Excel/CSV File (In Development)" Foreground="Gray"/>
+                                                        <TextBlock Text="Read values from spreadsheet files" FontSize="9" Foreground="LightGray"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                                <ComboBoxItem Tag="ConditionBased" IsEnabled="False">
+                                                    <StackPanel>
+                                                        <TextBlock Text="⚙️ Condition-Based Calculation (In Development)" Foreground="Gray"/>
+                                                        <TextBlock Text="Calculate values based on custom conditions" FontSize="9" Foreground="LightGray"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                                <ComboBoxItem Tag="DateExpression" IsEnabled="False">
+                                                    <StackPanel>
+                                                        <TextBlock Text="📆 Date Expression (In Development)" Foreground="Gray"/>
+                                                        <TextBlock Text="Calculate using date/time formulas" FontSize="9" Foreground="LightGray"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                                <ComboBoxItem Tag="Expression" IsEnabled="False">
+                                                    <StackPanel>
+                                                        <TextBlock Text="💻 Custom Expression (In Development)" Foreground="Gray"/>
+                                                        <TextBlock Text="Use C# expressions for complex logic" FontSize="9" Foreground="LightGray"/>
+                                                    </StackPanel>
+                                                </ComboBoxItem>
+                                            </ComboBox>
+                                            <TextBlock Text="✅ Date-Based Array is fully functional | 🚧 Other types are in development" 
+                                                       FontSize="10" 
+                                                       Foreground="Gray" 
+                                                       Margin="0,4,0,12" 
+                                                       TextWrapping="Wrap"/>
+                                            
+                                            <!-- Date-Based Array Configuration -->
+                                            <StackPanel x:Name="DateBasedArrayConfig" Visibility="Visible" Margin="0,8,0,0">
+                                                <TextBlock Text="📅 Date-Based Array Configuration" FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
+                                                <TextBlock Text="Values are selected based on days elapsed since start date." FontSize="10" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                                                
+                                                <Label Content="Start Date:" FontWeight="Bold" Margin="0,4,0,2"/>
+                                                <DatePicker SelectedDate="{Binding SelectedNodeEdit.StartDatePicker}" Padding="6" FirstDayOfWeek="Monday"/>
+                                                <TextBlock Text="First array item will be used on this date" FontSize="10" Foreground="Gray" Margin="0,2,0,8"/>
+                                                
+                                                <Label Content="Data Array (JSON Array):" FontWeight="Bold" Margin="0,8,0,2"/>
+                                                <TextBox Text="{Binding SelectedNodeEdit.DataArrayJson, UpdateSourceTrigger=PropertyChanged}" 
+                                                         Padding="6" 
+                                                         AcceptsReturn="True" 
+                                                         TextWrapping="Wrap" 
+                                                         VerticalScrollBarVisibility="Auto"
+                                                         FontFamily="Courier New"
+                                                         FontSize="10"
+                                                         MinHeight="100"
+                                                         MaxHeight="200"/>
+                                                <TextBlock FontSize="10" Foreground="Gray" Margin="0,2,0,0" TextWrapping="Wrap">
+                                                    <Run Text="Example for mouse click:"/>
+                                                    <LineBreak/>
+                                                    <Run Text='["{\"x\":100,\"y\":200}", "{\"x\":150,\"y\":250}", "{\"x\":200,\"y\":300}"]' FontFamily="Courier New"/>
+                                                    <LineBreak/>
+                                                    <Run Text="Each item = one day. If array exceeds, execution stops with alert."/>
+                                                </TextBlock>
+                                                
+                                                <Label Content="Value Mappings (JSON):" FontWeight="Bold" Margin="0,12,0,2"/>
+                                                <TextBox Text="{Binding SelectedNodeEdit.ValueMappingsJson, UpdateSourceTrigger=PropertyChanged}" 
+                                                         Padding="6" 
+                                                         AcceptsReturn="True" 
+                                                         TextWrapping="Wrap"
+                                                         FontFamily="Courier New"
+                                                         FontSize="10"
+                                                         MinHeight="60"/>
+                                                <TextBlock FontSize="10" Foreground="Gray" Margin="0,2,0,0" TextWrapping="Wrap">
+                                                    <Run Text="Map JSON fields to operation values:"/>
+                                                    <LineBreak/>
+                                                    <Run Text='{"IntValues[0]": "$.x", "IntValues[1]": "$.y"}' FontFamily="Courier New"/>
+                                                    <LineBreak/>
+                                                    <Run Text='{"StringValues[0]": "$.text"}' FontFamily="Courier New"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            
+                                            <!-- In Development Placeholder -->
+                                            <StackPanel x:Name="InDevelopmentPlaceholder" Visibility="Collapsed" Margin="0,8,0,0">
+                                                <Border BorderBrush="#FFA500" BorderThickness="2" CornerRadius="4" Padding="20" Background="#FFF8DC">
+                                                    <StackPanel HorizontalAlignment="Center">
+                                                        <TextBlock Text="🚧 IN DEVELOPMENT" FontWeight="Bold" FontSize="16" Foreground="#FF8C00" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                                        <TextBlock Text="This dynamic source type is currently being developed." 
+                                                                   FontSize="12" 
+                                                                   Foreground="#555" 
+                                                                   HorizontalAlignment="Center" 
+                                                                   Margin="0,0,0,4"
+                                                                   TextWrapping="Wrap"
+                                                                   TextAlignment="Center"/>
+                                                        <TextBlock x:Name="InDevelopmentDescription" 
+                                                                   Text="Please use Date-Based Array for now." 
+                                                                   FontSize="11" 
+                                                                   Foreground="Gray" 
+                                                                   HorizontalAlignment="Center"
+                                                                   TextWrapping="Wrap"
+                                                                   TextAlignment="Center"
+                                                                   Margin="0,8,0,0"/>
+                                                        <TextBlock Text="✅ Date-Based Array is fully functional and ready to use!" 
+                                                                   FontSize="10" 
+                                                                   Foreground="#4CAF50" 
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"
+                                                                   Margin="0,12,0,0"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
                                     <!-- Dynamic Operation-Specific Fields -->
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,16,0,0" Background="#F9F9F9">
+                                    <Border x:Name="StaticParamsPanel" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,16,0,0" Background="#F9F9F9">
                                         <StackPanel>
                                             <TextBlock Text="Operation Parameters" FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
                                             

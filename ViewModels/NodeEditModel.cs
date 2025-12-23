@@ -91,6 +91,92 @@ namespace GraphSimulator.ViewModels
         private string previousNodeId = "";
         public string PreviousNodeId { get => previousNodeId; set { SetProperty(ref previousNodeId, value); UpdateJsonData(); } }
 
+        // ===== Dynamic Value Properties =====
+        
+        private string valueMode = "Static";
+        public string ValueMode 
+        { 
+            get => valueMode; 
+            set 
+            { 
+                if (SetProperty(ref valueMode, value))
+                {
+                    UpdateJsonData();
+                }
+            } 
+        }
+
+        private string dynamicSourceType = "DateBasedArray";
+        public string DynamicSourceType 
+        { 
+            get => dynamicSourceType; 
+            set { SetProperty(ref dynamicSourceType, value); UpdateJsonData(); } 
+        }
+
+        private string startDate = DateTime.Now.ToString("yyyy-MM-dd");
+        public string StartDate 
+        { 
+            get => startDate; 
+            set 
+            { 
+                if (SetProperty(ref startDate, value))
+                {
+                    // Also update the DateTime property
+                    if (DateTime.TryParse(value, out DateTime dt))
+                    {
+                        startDatePicker = dt;
+                        OnPropertyChanged(nameof(StartDatePicker));
+                    }
+                    UpdateJsonData();
+                }
+            } 
+        }
+
+        private DateTime startDatePicker = DateTime.Now;
+        [System.Text.Json.Serialization.JsonIgnore]
+        public DateTime StartDatePicker
+        {
+            get => startDatePicker;
+            set
+            {
+                if (SetProperty(ref startDatePicker, value))
+                {
+                    startDate = value.ToString("yyyy-MM-dd");
+                    OnPropertyChanged(nameof(StartDate));
+                    UpdateJsonData();
+                }
+            }
+        }
+
+        private string dataArrayJson = "[]";
+        public string DataArrayJson 
+        { 
+            get => dataArrayJson; 
+            set { SetProperty(ref dataArrayJson, value); UpdateJsonData(); } 
+        }
+
+        private string valueMappingsJson = "{}";
+        public string ValueMappingsJson 
+        { 
+            get => valueMappingsJson; 
+            set { SetProperty(ref valueMappingsJson, value); UpdateJsonData(); } 
+        }
+
+        // API properties (for future use)
+        private string apiEndpoint = "";
+        public string ApiEndpoint 
+        { 
+            get => apiEndpoint; 
+            set { SetProperty(ref apiEndpoint, value); UpdateJsonData(); } 
+        }
+
+        private string apiMethod = "GET";
+        public string ApiMethod 
+        { 
+            get => apiMethod; 
+            set { SetProperty(ref apiMethod, value); UpdateJsonData(); } 
+        }
+
         private bool isUpdatingFromJson = false;
 
         private void UpdateJsonDataForType()
@@ -159,11 +245,32 @@ namespace GraphSimulator.ViewModels
 
             try
             {
+                object? dynamicSource = null;
+
+                // Build dynamic source if in Dynamic mode
+                if (valueMode == "Dynamic")
+                {
+                    var valueMappings = ParseValueMappings(valueMappingsJson);
+                    var dataArray = ParseDataArray(dataArrayJson);
+
+                    dynamicSource = new
+                    {
+                        SourceType = dynamicSourceType,
+                        StartDate = string.IsNullOrEmpty(startDate) ? null : startDate,
+                        DataArray = dataArray?.Length > 0 ? dataArray : null,
+                        ValueMappings = valueMappings?.Count > 0 ? valueMappings : null,
+                        ApiEndpoint = string.IsNullOrEmpty(apiEndpoint) ? null : apiEndpoint,
+                        ApiMethod = string.IsNullOrEmpty(apiMethod) || apiMethod == "GET" ? null : apiMethod
+                    };
+                }
+
                 var operation = new
                 {
                     Type = this.type,
-                    IntValues = GetIntValuesForType(),
-                    StringValues = GetStringValuesForType(),
+                    ValueMode = valueMode,
+                    DynamicSource = dynamicSource,
+                    IntValues = valueMode == "Static" ? GetIntValuesForType() : Array.Empty<int>(),
+                    StringValues = valueMode == "Static" ? GetStringValuesForType() : Array.Empty<string>(),
                     CustomCode = string.IsNullOrEmpty(customCode) ? null : customCode,
                     GraphFilePath = string.IsNullOrEmpty(graphFilePath) ? null : graphFilePath,
                     Priority = priority,
@@ -186,6 +293,34 @@ namespace GraphSimulator.ViewModels
             catch
             {
                 // Ignore serialization errors
+            }
+        }
+
+        private System.Collections.Generic.Dictionary<string, string>? ParseValueMappings(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json) || json == "{}") return null;
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, string>>(json);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private string[]? ParseDataArray(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json) || json == "[]") return null;
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<string[]>(json);
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -328,6 +463,57 @@ namespace GraphSimulator.ViewModels
                     enabled = enabledElement.GetBoolean();
                 }
 
+                // Load ValueMode and DynamicSource
+                if (root.TryGetProperty("ValueMode", out var valueModeElement))
+                {
+                    valueMode = valueModeElement.GetString() ?? "Static";
+                }
+                else
+                {
+                    valueMode = "Static"; // Default for legacy nodes
+                }
+
+                if (root.TryGetProperty("DynamicSource", out var dynamicSourceElement) && 
+                    dynamicSourceElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+                {
+                    if (dynamicSourceElement.TryGetProperty("SourceType", out var sourceTypeElement))
+                    {
+                        dynamicSourceType = sourceTypeElement.GetString() ?? "DateBasedArray";
+                    }
+
+                    if (dynamicSourceElement.TryGetProperty("StartDate", out var startDateElement))
+                    {
+                        startDate = startDateElement.GetString() ?? DateTime.Now.ToString("yyyy-MM-dd");
+                        if (DateTime.TryParse(startDate, out DateTime dt))
+                        {
+                            startDatePicker = dt;
+                        }
+                    }
+
+                    if (dynamicSourceElement.TryGetProperty("DataArray", out var dataArrayElement) && 
+                        dataArrayElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        var arrayItems = dataArrayElement.EnumerateArray().Select(e => e.GetString() ?? "").ToArray();
+                        dataArrayJson = System.Text.Json.JsonSerializer.Serialize(arrayItems);
+                    }
+
+                    if (dynamicSourceElement.TryGetProperty("ValueMappings", out var valueMappingsElement) && 
+                        valueMappingsElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    {
+                        valueMappingsJson = valueMappingsElement.GetRawText();
+                    }
+
+                    if (dynamicSourceElement.TryGetProperty("ApiEndpoint", out var apiEndpointElement))
+                    {
+                        apiEndpoint = apiEndpointElement.GetString() ?? "";
+                    }
+
+                    if (dynamicSourceElement.TryGetProperty("ApiMethod", out var apiMethodElement))
+                    {
+                        apiMethod = apiMethodElement.GetString() ?? "GET";
+                    }
+                }
+
                 OnPropertyChanged(nameof(XCoordinate));
                 OnPropertyChanged(nameof(YCoordinate));
                 OnPropertyChanged(nameof(ScrollAmount));
@@ -344,6 +530,13 @@ namespace GraphSimulator.ViewModels
                 OnPropertyChanged(nameof(Priority));
                 OnPropertyChanged(nameof(Enabled));
                 OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ValueMode));
+                OnPropertyChanged(nameof(DynamicSourceType));
+                OnPropertyChanged(nameof(StartDate));
+                OnPropertyChanged(nameof(DataArrayJson));
+                OnPropertyChanged(nameof(ValueMappingsJson));
+                OnPropertyChanged(nameof(ApiEndpoint));
+                OnPropertyChanged(nameof(ApiMethod));
             }
             catch
             {

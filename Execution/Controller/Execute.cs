@@ -255,6 +255,9 @@ namespace GraphSimulator.Execution.Controller
             
             for (int i = 0; i < frequency; i++)
             {
+                // Set iteration index for iteration-based dynamic sources
+                operation.CurrentIterationIndex = i;
+                
                 await ExecuteSingleOperationAsync(operation);
                 
                 // Add small delay between repetitions if frequency > 1
@@ -276,6 +279,13 @@ namespace GraphSimulator.Execution.Controller
         /// </summary>
         private async Task ExecuteSingleOperationAsync(OperationModel operation)
         {
+            // Resolve dynamic values if needed
+            if (operation.ValueMode == Model.NodeValueMode.Dynamic)
+            {
+                var resolver = new Services.ValueResolverService();
+                operation = await resolver.ResolveOperationAsync(operation);
+            }
+
             // Execute based on type
             try
             {

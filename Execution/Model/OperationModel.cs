@@ -71,6 +71,22 @@ namespace GraphSimulator.Execution.Model
         /// ID of the previous node that should execute before this one
         /// </summary>
         public string? PreviousNodeId { get; set; }
+
+        /// <summary>
+        /// Defines how this operation gets its values (Static or Dynamic)
+        /// </summary>
+        public NodeValueMode ValueMode { get; set; } = NodeValueMode.Static;
+
+        /// <summary>
+        /// Dynamic source configuration (only used if ValueMode == Dynamic)
+        /// </summary>
+        public DynamicValueSource? DynamicSource { get; set; }
+
+        /// <summary>
+        /// Current iteration index for array-based operations (runtime only, not serialized)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        public int? CurrentIterationIndex { get; set; }
     }
 
     /// <summary>

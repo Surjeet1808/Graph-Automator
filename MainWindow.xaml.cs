@@ -978,6 +978,33 @@ namespace GraphSimulator
             
             // Update operation-specific field visibility
             UpdateOperationFieldsVisibility(editModel.Type);
+            
+            // Update value mode panel visibility
+            UpdateValueModePanelVisibility(editModel.ValueMode);
+        }
+
+        private void UpdateValueModePanelVisibility(string valueMode)
+        {
+            if (valueMode == "Dynamic")
+            {
+                DynamicSourcePanel.Visibility = Visibility.Visible;
+                StaticParamsPanel.Visibility = Visibility.Collapsed;
+                
+                // Update dynamic source type panels - default to DateBasedArray
+                DateBasedArrayConfig.Visibility = Visibility.Visible;
+                InDevelopmentPlaceholder.Visibility = Visibility.Collapsed;
+                
+                // Set default selection to DateBasedArray if not already set
+                if (DynamicSourceTypeCombo.SelectedIndex < 0)
+                {
+                    DynamicSourceTypeCombo.SelectedIndex = 0; // Date-Based Array
+                }
+            }
+            else
+            {
+                DynamicSourcePanel.Visibility = Visibility.Collapsed;
+                StaticParamsPanel.Visibility = Visibility.Visible;
+            }
         }
 
         private void UpdateOperationFieldsVisibility(string operationType)
@@ -1388,6 +1415,185 @@ namespace GraphSimulator
             catch (Exception ex)
             {
                 MessageBox.Show($"Error saving executable graph: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Handle value mode change between Static and Dynamic
+        /// </summary>
+        private void ValueMode_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel?.SelectedNodeEdit == null) return;
+
+            if (sender is RadioButton radio && radio.IsChecked == true)
+            {
+                string? mode = radio.Content?.ToString();
+                if (mode == "Static Values")
+                {
+                    _viewModel.SelectedNodeEdit.ValueMode = "Static";
+                    DynamicSourcePanel.Visibility = Visibility.Collapsed;
+                    StaticParamsPanel.Visibility = Visibility.Visible;
+                }
+                else if (mode == "Dynamic Values")
+                {
+                    _viewModel.SelectedNodeEdit.ValueMode = "Dynamic";
+                    DynamicSourcePanel.Visibility = Visibility.Visible;
+                    StaticParamsPanel.Visibility = Visibility.Collapsed;
+                    
+                    // Set default values for dynamic source
+                    if (string.IsNullOrEmpty(_viewModel.SelectedNodeEdit.StartDate))
+                    {
+                        _viewModel.SelectedNodeEdit.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
+                    }
+                    
+                    if (string.IsNullOrEmpty(_viewModel.SelectedNodeEdit.DataArrayJson) || _viewModel.SelectedNodeEdit.DataArrayJson == "[]")
+                    {
+                        // Set example data based on operation type
+                        SetDefaultDynamicArrayData();
+                    }
+                    
+                    if (string.IsNullOrEmpty(_viewModel.SelectedNodeEdit.ValueMappingsJson) || _viewModel.SelectedNodeEdit.ValueMappingsJson == "{}")
+                    {
+                        // Set example mappings based on operation type
+                        SetDefaultValueMappings();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle dynamic source type change
+        /// </summary>
+        private void DynamicSourceType_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (_viewModel?.SelectedNodeEdit == null) return;
+            
+            var selectedItem = DynamicSourceTypeCombo.SelectedItem as ComboBoxItem;
+            if (selectedItem == null) return;
+
+            string? sourceTypeTag = selectedItem.Tag?.ToString();
+            
+            // Hide all config panels
+            DateBasedArrayConfig.Visibility = Visibility.Collapsed;
+            InDevelopmentPlaceholder.Visibility = Visibility.Collapsed;
+            
+            // Show relevant panel based on source type
+            if (sourceTypeTag == "DateBasedArray")
+            {
+                DateBasedArrayConfig.Visibility = Visibility.Visible;
+                _viewModel.SelectedNodeEdit.DynamicSourceType = "DateBasedArray";
+            }
+            else
+            {
+                // Show "In Development" placeholder for all other types
+                InDevelopmentPlaceholder.Visibility = Visibility.Visible;
+                
+                // Update description based on type
+                string description = sourceTypeTag switch
+                {
+                    "IterationBasedArray" => "Iteration-Based Array: Values cycle through array based on execution frequency.\nThis feature is coming soon!",
+                    "API" => "API Source: Fetch values from REST APIs in real-time.\nThis feature is coming soon!",
+                    "ExcelFile" => "Excel/CSV File: Read values from spreadsheet files.\nThis feature is coming soon!",
+                    "ConditionBased" => "Condition-Based Calculation: Calculate values based on custom conditions and logic.\nThis feature is coming soon!",
+                    "DateExpression" => "Date Expression: Calculate values using date/time formulas.\nThis feature is coming soon!",
+                    "Expression" => "Custom Expression: Use C# expressions for complex value calculations.\nThis feature is coming soon!",
+                    _ => "This feature is currently being developed.\nPlease use Date-Based Array for now."
+                };
+                
+                InDevelopmentDescription.Text = description;
+            }
+        }
+
+        /// <summary>
+        /// Set default dynamic array data based on operation type
+        /// </summary>
+        private void SetDefaultDynamicArrayData()
+        {
+            if (_viewModel?.SelectedNodeEdit == null) return;
+
+            string operationType = _viewModel.SelectedNodeEdit.Type?.ToLower() ?? "";
+            
+            switch (operationType)
+            {
+                case "mouse_left_click":
+                case "mouse_right_click":
+                case "mouse_move":
+                    _viewModel.SelectedNodeEdit.DataArrayJson = 
+                        "[\"{\\\"x\\\":100,\\\"y\\\":200}\", \"{\\\"x\\\":150,\\\"y\\\":250}\", \"{\\\"x\\\":200,\\\"y\\\":300}\"]";
+                    break;
+                
+                case "type_text":
+                    _viewModel.SelectedNodeEdit.DataArrayJson = 
+                        "[\"{\\\"text\\\":\\\"First day message\\\"}\", \"{\\\"text\\\":\\\"Second day message\\\"}\", \"{\\\"text\\\":\\\"Third day message\\\"}\"]";
+                    break;
+                
+                case "key_press":
+                case "key_down":
+                case "key_up":
+                    _viewModel.SelectedNodeEdit.DataArrayJson = 
+                        "[\"{\\\"keyCode\\\":13}\", \"{\\\"keyCode\\\":32}\", \"{\\\"keyCode\\\":27}\"]";
+                    break;
+                
+                case "scroll_up":
+                case "scroll_down":
+                case "scroll_left":
+                case "scroll_right":
+                    _viewModel.SelectedNodeEdit.DataArrayJson = 
+                        "[\"{\\\"amount\\\":120}\", \"{\\\"amount\\\":240}\", \"{\\\"amount\\\":180}\"]";
+                    break;
+                
+                case "wait":
+                    _viewModel.SelectedNodeEdit.DataArrayJson = 
+                        "[\"{\\\"duration\\\":1000}\", \"{\\\"duration\\\":2000}\", \"{\\\"duration\\\":1500}\"]";
+                    break;
+                
+                default:
+                    _viewModel.SelectedNodeEdit.DataArrayJson = "[\"{}\" , \"{}\", \"{}\"]";
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Set default value mappings based on operation type
+        /// </summary>
+        private void SetDefaultValueMappings()
+        {
+            if (_viewModel?.SelectedNodeEdit == null) return;
+
+            string operationType = _viewModel.SelectedNodeEdit.Type?.ToLower() ?? "";
+            
+            switch (operationType)
+            {
+                case "mouse_left_click":
+                case "mouse_right_click":
+                case "mouse_move":
+                    _viewModel.SelectedNodeEdit.ValueMappingsJson = "{\"IntValues[0]\": \"$.x\", \"IntValues[1]\": \"$.y\"}";
+                    break;
+                
+                case "type_text":
+                    _viewModel.SelectedNodeEdit.ValueMappingsJson = "{\"StringValues[0]\": \"$.text\"}";
+                    break;
+                
+                case "key_press":
+                case "key_down":
+                case "key_up":
+                    _viewModel.SelectedNodeEdit.ValueMappingsJson = "{\"IntValues[0]\": \"$.keyCode\"}";
+                    break;
+                
+                case "scroll_up":
+                case "scroll_down":
+                case "scroll_left":
+                case "scroll_right":
+                    _viewModel.SelectedNodeEdit.ValueMappingsJson = "{\"IntValues[0]\": \"$.amount\"}";
+                    break;
+                
+                case "wait":
+                    _viewModel.SelectedNodeEdit.ValueMappingsJson = "{\"IntValues[0]\": \"$.duration\"}";
+                    break;
+                
+                default:
+                    _viewModel.SelectedNodeEdit.ValueMappingsJson = "{}";
+                    break;
             }
         }
        
