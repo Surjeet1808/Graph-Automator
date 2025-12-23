@@ -313,7 +313,9 @@
                                                 <TextBlock FontSize="10" Foreground="Gray" Margin="0,2,0,0" TextWrapping="Wrap">
                                                     <Run Text="Example for mouse click:"/>
                                                     <LineBreak/>
-                                                    <Run Text='["{\"x\":100,\"y\":200}", "{\"x\":150,\"y\":250}", "{\"x\":200,\"y\":300}"]' FontFamily="Courier New"/>
+                                                    <Run FontFamily="Courier New">
+                                                        <Run.Text>["{\"x\":100,\"y\":200}", "{\"x\":150,\"y\":250}", "{\"x\":200,\"y\":300}"]</Run.Text>
+                                                    </Run>
                                                     <LineBreak/>
                                                     <Run Text="Each item = one day. If array exceeds, execution stops with alert."/>
                                                 </TextBlock>
@@ -329,9 +331,13 @@
                                                 <TextBlock FontSize="10" Foreground="Gray" Margin="0,2,0,0" TextWrapping="Wrap">
                                                     <Run Text="Map JSON fields to operation values:"/>
                                                     <LineBreak/>
-                                                    <Run Text='{"IntValues[0]": "$.x", "IntValues[1]": "$.y"}' FontFamily="Courier New"/>
+                                                    <Run FontFamily="Courier New">
+                                                        <Run.Text>{"IntValues[0]": "$.x", "IntValues[1]": "$.y"}</Run.Text>
+                                                    </Run>
                                                     <LineBreak/>
-                                                    <Run Text='{"StringValues[0]": "$.text"}' FontFamily="Courier New"/>
+                                                    <Run FontFamily="Courier New">
+                                                        <Run.Text>{"StringValues[0]": "$.text"}</Run.Text>
+                                                    </Run>
                                                 </TextBlock>
                                             </StackPanel>
                                             
