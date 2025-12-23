@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using GraphSimulator.Execution.Model;
 using GraphSimulator.Execution.Common;
+using GraphSimulator.Execution.Services;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -280,9 +281,9 @@ namespace GraphSimulator.Execution.Controller
         private async Task ExecuteSingleOperationAsync(OperationModel operation)
         {
             // Resolve dynamic values if needed
-            if (operation.ValueMode == Model.NodeValueMode.Dynamic)
+            if (operation.ValueMode == NodeValueMode.Dynamic)
             {
-                var resolver = new Services.ValueResolverService();
+                var resolver = new ValueResolverService();
                 operation = await resolver.ResolveOperationAsync(operation);
             }
 

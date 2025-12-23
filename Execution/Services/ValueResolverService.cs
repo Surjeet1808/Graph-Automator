@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GraphSimulator.Execution.Model;
 
 namespace GraphSimulator.Execution.Services
 {
@@ -15,7 +16,7 @@ namespace GraphSimulator.Execution.Services
         /// </summary>
         public async Task<OperationModel> ResolveOperationAsync(OperationModel operation)
         {
-            if (operation.ValueMode == Model.NodeValueMode.Static)
+            if (operation.ValueMode == NodeValueMode.Static)
             {
                 return operation; // No resolution needed
             }
@@ -44,12 +45,12 @@ namespace GraphSimulator.Execution.Services
             {
                 resolvedData = operation.DynamicSource.SourceType switch
                 {
-                    Model.DynamicSourceType.DateBasedArray => ResolveDateBasedArray(operation.DynamicSource),
-                    Model.DynamicSourceType.IterationBasedArray => ResolveIterationBasedArray(operation.DynamicSource, operation.CurrentIterationIndex ?? 0),
-                    Model.DynamicSourceType.API => await ResolveFromApiAsync(operation.DynamicSource),
-                    Model.DynamicSourceType.DateExpression => ResolveDateExpression(operation.DynamicSource),
-                    Model.DynamicSourceType.Expression => ResolveExpression(operation.DynamicSource),
-                    Model.DynamicSourceType.FileContent => await ResolveFromFileAsync(operation.DynamicSource),
+                    DynamicSourceType.DateBasedArray => ResolveDateBasedArray(operation.DynamicSource),
+                    DynamicSourceType.IterationBasedArray => ResolveIterationBasedArray(operation.DynamicSource, operation.CurrentIterationIndex ?? 0),
+                    DynamicSourceType.API => await ResolveFromApiAsync(operation.DynamicSource),
+                    DynamicSourceType.DateExpression => ResolveDateExpression(operation.DynamicSource),
+                    DynamicSourceType.Expression => ResolveExpression(operation.DynamicSource),
+                    DynamicSourceType.FileContent => await ResolveFromFileAsync(operation.DynamicSource),
                     _ => throw new NotSupportedException(
                         $"❌ UNSUPPORTED DYNAMIC SOURCE\n\n" +
                         $"Dynamic source type '{operation.DynamicSource.SourceType}' is not yet implemented.")
@@ -77,7 +78,7 @@ namespace GraphSimulator.Execution.Services
         /// <summary>
         /// Resolves value from date-based array based on days elapsed since start date
         /// </summary>
-        private Dictionary<string, object> ResolveDateBasedArray(Model.DynamicValueSource source)
+        private Dictionary<string, object> ResolveDateBasedArray(DynamicValueSource source)
         {
             if (source.DataArray == null || source.DataArray.Length == 0)
             {
@@ -149,7 +150,7 @@ namespace GraphSimulator.Execution.Services
         /// <summary>
         /// Resolves value from array based on iteration index
         /// </summary>
-        private Dictionary<string, object> ResolveIterationBasedArray(Model.DynamicValueSource source, int iterationIndex)
+        private Dictionary<string, object> ResolveIterationBasedArray(DynamicValueSource source, int iterationIndex)
         {
             if (source.DataArray == null || source.DataArray.Length == 0)
             {
@@ -180,7 +181,7 @@ namespace GraphSimulator.Execution.Services
         /// <summary>
         /// Resolves values from API endpoint (future implementation)
         /// </summary>
-        private async Task<Dictionary<string, object>> ResolveFromApiAsync(Model.DynamicValueSource source)
+        private async Task<Dictionary<string, object>> ResolveFromApiAsync(DynamicValueSource source)
         {
             throw new NotImplementedException("API source type is not yet implemented. Please use DateBasedArray for now.");
         }
@@ -188,7 +189,7 @@ namespace GraphSimulator.Execution.Services
         /// <summary>
         /// Resolves values from date expression (future implementation)
         /// </summary>
-        private Dictionary<string, object> ResolveDateExpression(Model.DynamicValueSource source)
+        private Dictionary<string, object> ResolveDateExpression(DynamicValueSource source)
         {
             throw new NotImplementedException("DateExpression source type is not yet implemented. Please use DateBasedArray for now.");
         }
@@ -196,7 +197,7 @@ namespace GraphSimulator.Execution.Services
         /// <summary>
         /// Resolves values from C# expression (future implementation)
         /// </summary>
-        private Dictionary<string, object> ResolveExpression(Model.DynamicValueSource source)
+        private Dictionary<string, object> ResolveExpression(DynamicValueSource source)
         {
             throw new NotImplementedException("Expression source type is not yet implemented. Please use DateBasedArray for now.");
         }
@@ -204,7 +205,7 @@ namespace GraphSimulator.Execution.Services
         /// <summary>
         /// Resolves values from file content (future implementation)
         /// </summary>
-        private async Task<Dictionary<string, object>> ResolveFromFileAsync(Model.DynamicValueSource source)
+        private async Task<Dictionary<string, object>> ResolveFromFileAsync(DynamicValueSource source)
         {
             throw new NotImplementedException("FileContent source type is not yet implemented. Please use DateBasedArray for now.");
         }
