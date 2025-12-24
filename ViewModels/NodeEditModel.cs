@@ -91,6 +91,9 @@ namespace GraphSimulator.ViewModels
         private string previousNodeId = "";
         public string PreviousNodeId { get => previousNodeId; set { SetProperty(ref previousNodeId, value); UpdateJsonData(); } }
 
+        private string valueSource = "date";
+        public string ValueSource { get => valueSource; set { SetProperty(ref valueSource, value); UpdateJsonData(); } }
+
         private bool isUpdatingFromJson = false;
 
         private void UpdateJsonDataForType()
@@ -170,6 +173,7 @@ namespace GraphSimulator.ViewModels
                     DelayBefore = delayBefore,
                     DelayAfter = delayAfter,
                     Frequency = frequency,
+                    ValueSource = valueSource,
                     NextNodeId = string.IsNullOrEmpty(nextNodeId) ? null : nextNodeId,
                     PreviousNodeId = string.IsNullOrEmpty(previousNodeId) ? null : previousNodeId,
                     Description = string.IsNullOrEmpty(description) ? null : description,
@@ -328,6 +332,11 @@ namespace GraphSimulator.ViewModels
                     enabled = enabledElement.GetBoolean();
                 }
 
+                if (root.TryGetProperty("ValueSource", out var valueSourceElement))
+                {
+                    valueSource = valueSourceElement.GetString() ?? "date";
+                }
+
                 OnPropertyChanged(nameof(XCoordinate));
                 OnPropertyChanged(nameof(YCoordinate));
                 OnPropertyChanged(nameof(ScrollAmount));
@@ -339,6 +348,7 @@ namespace GraphSimulator.ViewModels
                 OnPropertyChanged(nameof(DelayBefore));
                 OnPropertyChanged(nameof(DelayAfter));
                 OnPropertyChanged(nameof(Frequency));
+                OnPropertyChanged(nameof(ValueSource));
                 OnPropertyChanged(nameof(NextNodeId));
                 OnPropertyChanged(nameof(PreviousNodeId));
                 OnPropertyChanged(nameof(Priority));

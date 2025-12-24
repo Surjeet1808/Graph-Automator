@@ -364,6 +364,17 @@
                                             <TextBox Text="{Binding SelectedNodeEdit.Frequency, UpdateSourceTrigger=PropertyChanged}" Padding="6"/>
                                             <TextBlock Text="(Number of times to repeat this operation)" FontSize="10" Foreground="Gray" Margin="0,2,0,0"/>
 
+                                            <Label Content="Value Source:" Margin="0,8,0,2"/>
+                                            <ComboBox SelectedItem="{Binding SelectedNodeEdit.ValueSource, UpdateSourceTrigger=PropertyChanged}" Padding="6">
+                                                <ComboBox.Items>
+                                                    <ComboBoxItem Content="date" IsSelected="True"/>
+                                                    <ComboBoxItem Content="array"/>
+                                                    <ComboBoxItem Content="frequency-array"/>
+                                                    <ComboBoxItem Content="excel"/>
+                                                </ComboBox.Items>
+                                            </ComboBox>
+                                            <TextBlock Text="(Source for operation values)" FontSize="10" Foreground="Gray" Margin="0,2,0,0"/>
+
                                             <Label Content="Description:" Margin="0,8,0,2"/>
                                             <TextBox Text="{Binding SelectedNodeEdit.Description, UpdateSourceTrigger=PropertyChanged}" Padding="6"/>
 

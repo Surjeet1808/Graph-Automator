@@ -71,6 +71,11 @@ namespace GraphSimulator.Execution.Model
         /// ID of the previous node that should execute before this one
         /// </summary>
         public string? PreviousNodeId { get; set; }
+
+        /// <summary>
+        /// Source for operation values (date, array, frequency-array, excel)
+        /// </summary>
+        public string ValueSource { get; set; } = "date";
     }
 
     /// <summary>
