@@ -379,15 +379,39 @@
                                             <Border x:Name="DateMapPanel" Visibility="Collapsed" BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,8,0,0" Background="#FFFEF5">
                                                 <StackPanel>
                                                     <TextBlock Text="Date-Based Values" FontWeight="Bold" FontSize="11" Margin="0,0,0,4"/>
-                                                    <TextBlock Text="Format: { &quot;YYYY-MM-DD&quot;: { &quot;IntValues&quot;: [x, y], &quot;StringValues&quot;: [&quot;text&quot;] } }" 
+                                                    <TextBlock Text="Format: { &quot;YYYY-MM-DD&quot;: { &quot;IntValues&quot;: [...], &quot;StringValues&quot;: [...] } }" 
                                                                FontSize="9" Foreground="#666" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                                    
+                                                    <!-- Array Position Reference -->
+                                                    <Expander Header="📋 Array Position Reference" Margin="0,4,0,4" IsExpanded="False">
+                                                        <Border BorderBrush="#DDD" BorderThickness="1" Background="White" Padding="6" Margin="0,4,0,0">
+                                                            <TextBlock FontSize="9" TextWrapping="Wrap" LineHeight="16">
+                                                                <Run Text="IntValues Positions:" FontWeight="Bold"/>
+                                                                <LineBreak/>
+                                                                <Run Text="• mouse_left_click, mouse_right_click, mouse_move: [0]=X, [1]=Y" Foreground="#0066CC"/>
+                                                                <LineBreak/>
+                                                                <Run Text="• scroll_up, scroll_down, scroll_left, scroll_right: [0]=Amount" Foreground="#0066CC"/>
+                                                                <LineBreak/>
+                                                                <Run Text="• key_press, key_down, key_up: [0]=KeyCode" Foreground="#0066CC"/>
+                                                                <LineBreak/>
+                                                                <Run Text="• wait: [0]=Milliseconds" Foreground="#0066CC"/>
+                                                                <LineBreak/><LineBreak/>
+                                                                <Run Text="StringValues Positions:" FontWeight="Bold"/>
+                                                                <LineBreak/>
+                                                                <Run Text="• type_text: [0]=TextToType" Foreground="#CC6600"/>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Expander>
+                                                    
                                                     <TextBlock Text="Example:" FontWeight="SemiBold" FontSize="10" Margin="0,4,0,2"/>
                                                     <TextBlock FontSize="9" Foreground="#444" TextWrapping="Wrap" Margin="0,0,0,4">
                                                         <Run Text="{}{"/>
                                                         <LineBreak/>
                                                         <Run Text="  &quot;2025-12-24&quot;: { &quot;IntValues&quot;: [100, 200] },"/>
                                                         <LineBreak/>
-                                                        <Run Text="  &quot;2025-12-25&quot;: { &quot;IntValues&quot;: [150, 250] }"/>
+                                                        <Run Text="  &quot;2025-12-25&quot;: { &quot;IntValues&quot;: [150, 250] },"/>
+                                                        <LineBreak/>
+                                                        <Run Text="  &quot;2025-12-26&quot;: { &quot;StringValues&quot;: [&quot;Boxing Day!&quot;] }"/>
                                                         <LineBreak/>
                                                         <Run Text="{}}"/>
                                                     </TextBlock>
