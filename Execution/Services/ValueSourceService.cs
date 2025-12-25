@@ -78,13 +78,4 @@ namespace GraphSimulator.Execution.Services
         public int[] IntValues { get; set; } = Array.Empty<int>();
         public string[] StringValues { get; set; } = Array.Empty<string>();
     }
-
-    /// <summary>
-    /// Represents values for a specific date
-    /// </summary>
-    public class DateMappedValues
-    {
-        public int[]? IntValues { get; set; }
-        public string[]? StringValues { get; set; }
-    }
 }
