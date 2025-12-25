@@ -1064,15 +1064,13 @@ namespace GraphSimulator
                     DateMapEditor.Text = model.DateMapJson ?? "{}";
                 }
             }
-                GraphCanvasControl.RenderGraph(_viewModel.CurrentGraph);
-            }
 
             // Update JSON editor when JsonData changes
-            if (e.PropertyName == nameof(NodeEditModel.JsonData) && sender is NodeEditModel model)
+            if (e.PropertyName == nameof(NodeEditModel.JsonData) && sender is NodeEditModel jsonModel)
             {
-                if (JsonEditor != null && JsonEditor.Text != model.JsonData)
+                if (JsonEditor != null && JsonEditor.Text != jsonModel.JsonData)
                 {
-                    JsonEditor.Text = model.JsonData;
+                    JsonEditor.Text = jsonModel.JsonData;
                 }
             }
 
@@ -1444,6 +1442,5 @@ namespace GraphSimulator
                 _viewModel.SelectedNodeEdit.DateMapJson = DateMapEditor.Text;
             }
         }
-       
     }
 }
